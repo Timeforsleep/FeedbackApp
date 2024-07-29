@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/feedback_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="意见反馈"
+        android:textSize="22dp"
+        android:layout_marginTop="12dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/back_iv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/feedback_tv"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/feedback_tv"
+        app:srcCompat="@drawable/arrow_back" />
+
+    <TextView
+        android:id="@+id/feedback_history_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="反馈历史"
+        android:textStyle="bold"
+        android:layout_marginRight="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/feedback_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/feedback_tv" />
+
+    <EditText
+        android:id="@+id/guide_tv"
+        android:gravity="start|top"
+        android:layout_width="0dp"
+        android:hint="为了更好的帮您解决问题，请在提交问题的同时上传截图信息，方法便我们更快速的帮您解决问题，另外您想要什么功能就在这里描述一下吧！"
+        android:background="@null"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:textCursorDrawable="@drawable/cursor"
+        android:textColorHint="#bec4cf"
+        android:textSize="14dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feedback_tv" />
+
+    <ImageView
+        android:id="@+id/add_image_iv"
+        android:layout_width="117dp"
+        android:layout_height="117dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guide_tv"
+        app:srcCompat="@drawable/add_image" />
+
+    <TextView
+        android:id="@+id/show_image_num_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="已添加0/4张图片"
+        android:textColor="#718398"
+        android:textSize="14dp"
+        app:layout_constraintStart_toStartOf="@+id/add_image_iv"
+        app:layout_constraintTop_toBottomOf="@+id/add_image_iv" />
+
+    <TextView
+        android:id="@+id/contact_show_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="联系方式"
+        android:textSize="18dp"
+        app:layout_constraintStart_toStartOf="@+id/show_image_num_tv"
+        app:layout_constraintTop_toBottomOf="@+id/show_image_num_tv" />
+
+    <EditText
+        android:id="@+id/phoneNum_editText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:ems="11"
+        android:textCursorDrawable="@drawable/cursor"
+        android:hint="请输入手机号和邮箱地址"
+        android:inputType="text"
+        android:textColorHint="#bec4cf"
+        android:textSize="18dp"
+        app:layout_constraintBottom_toBottomOf="@+id/contact_show_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/contact_show_tv"
+        app:layout_constraintTop_toTopOf="@+id/contact_show_tv"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="#eeeef0"
+        app:layout_constraintTop_toBottomOf="@+id/contact_show_tv"
+        tools:layout_editor_absoluteX="12dp" />
+
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/checkbox_selector"
+        android:button="@android:color/transparent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10dp"
+        android:layout_marginLeft="5dp"
+        android:text="已阅读并同意"
+        app:layout_constraintBottom_toBottomOf="@+id/checkbox"
+        app:layout_constraintStart_toEndOf="@+id/checkbox"
+        app:layout_constraintTop_toTopOf="@+id/checkbox" />
+
+    <TextView
+        android:id="@+id/personal_protect_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10dp"
+        android:text="《个人信息保护声明》"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:textColor="#1e73eb"
+        app:layout_constraintBottom_toBottomOf="@+id/textView6"
+        app:layout_constraintStart_toEndOf="@+id/textView6"
+        app:layout_constraintTop_toTopOf="@+id/textView6" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="及"
+        android:textSize="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/personal_protect_tv"
+        app:layout_constraintStart_toEndOf="@+id/personal_protect_tv"
+        app:layout_constraintTop_toTopOf="@+id/personal_protect_tv"
+        tools:layout_editor_absoluteX="152dp" />
+
+    <TextView
+        android:id="@+id/privacy_polite_tv"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:layout_height="wrap_content"
+        android:textColor="#1e73eb"
+        android:text="《汽车之家隐私政策》"
+        android:textSize="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView8"
+        app:layout_constraintStart_toEndOf="@+id/textView8"
+        app:layout_constraintTop_toTopOf="@+id/textView8" />
+
+    <TextView
+        android:id="@+id/submit_tv"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:background="#bec3ce"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:gravity="center"
+        android:text="提交"
+        android:textColor="#dee0e6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/checkbox" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
