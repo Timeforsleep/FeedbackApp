@@ -1,3 +1,3 @@
 package com.example.feedbackapp
 
-const val BASE_URL = "https://api.example.com/"
+const val BASE_URL = "http://6a9309a8.r10.cpolar.top/api/advice/"

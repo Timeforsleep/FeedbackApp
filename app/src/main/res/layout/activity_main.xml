@@ -11,9 +11,9 @@
         android:id="@+id/feedback_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:text="意见反馈"
         android:textSize="22dp"
-        android:layout_marginTop="12dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,58 +33,292 @@
         android:id="@+id/feedback_history_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginRight="12dp"
         android:text="反馈历史"
         android:textStyle="bold"
-        android:layout_marginRight="12dp"
         app:layout_constraintBottom_toBottomOf="@+id/feedback_tv"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/feedback_tv" />
 
-    <EditText
-        android:id="@+id/guide_tv"
-        android:gravity="start|top"
-        android:layout_width="0dp"
-        android:hint="为了更好的帮您解决问题，请在提交问题的同时上传截图信息，方法便我们更快速的帮您解决问题，另外您想要什么功能就在这里描述一下吧！"
-        android:background="@null"
+    <TextView
+        android:id="@+id/feedback_et_show_tv"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:text="反馈描述"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/question_type_rv" />
+
+    <EditText
+        android:id="@+id/guide_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="12dp"
+        android:layout_marginTop="12dp"
         android:layout_marginRight="12dp"
-        android:textCursorDrawable="@drawable/cursor"
+        android:background="@null"
+        android:gravity="start|top"
+        android:hint="为了更好的帮您解决问题，请在提交问题的同时上传截图信息，方法便我们更快速的帮您解决问题，另外您想要什么功能就在这里描述一下吧！"
         android:textColorHint="#bec4cf"
+        android:textCursorDrawable="@drawable/cursor"
         android:textSize="14dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feedback_et_show_tv" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="12dp"
+        android:background="#F0F0F0"
+        android:padding="8dp"
+        android:translationZ="1dp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/question_type_show_tv">
+
+        <TextView
+            android:id="@+id/fuc_show_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="功能异常"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/fuc_explain_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="内容报错，卡顿，错位等"
+            android:textColor="#bec4cf"
+            android:textSize="10dp"
+            app:layout_constraintEnd_toEndOf="@+id/fuc_show_tv"
+            app:layout_constraintStart_toStartOf="@+id/fuc_show_tv"
+            app:layout_constraintTop_toBottomOf="@+id/fuc_show_tv" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:background="#F0F0F0"
+        android:padding="8dp"
+        android:translationZ="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="@+id/constraintLayout2">
+
+        <TextView
+            android:id="@+id/product_show_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|top"
+            android:layout_marginTop="8dp"
+            android:text="产品改进"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/product_explain_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="反馈产品及服务优化建议"
+            android:textColor="#bec4cf"
+            android:textSize="10dp"
+            app:layout_constraintEnd_toEndOf="@+id/product_show_tv"
+            app:layout_constraintStart_toStartOf="@+id/product_show_tv"
+            app:layout_constraintTop_toBottomOf="@+id/product_show_tv" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <TextView
+        android:id="@+id/question_type_show_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="12dp"
+        android:text="问题类型"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/feedback_tv" />
 
-    <ImageView
-        android:id="@+id/add_image_iv"
-        android:layout_width="117dp"
-        android:layout_height="117dp"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.50121653" />
+
+
+    <TextView
+        android:id="@+id/question_scene_show_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="12dp"
+        android:text="问题发生的场景"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guide_tv"
-        app:srcCompat="@drawable/add_image" />
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/question_type_rv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginRight="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/question_scene_show_tv" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.37" />
+
+    <FrameLayout
+        android:id="@+id/add_image_fl1"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/add_image_fl2"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guide_et">
+
+
+        <ImageView
+            android:id="@+id/add_image_iv1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/add_image" />
+
+        <ImageView
+            android:id="@+id/delete_image_1"
+            android:layout_width="20dp"
+            android:visibility="gone"
+            android:layout_height="20dp"
+            android:layout_gravity="top|right"
+            app:srcCompat="@drawable/delete_icon" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/add_image_fl2"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:layout_constraintBottom_toBottomOf="@+id/add_image_fl1"
+        app:layout_constraintEnd_toStartOf="@+id/add_image_fl3"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/add_image_fl1"
+        app:layout_constraintTop_toTopOf="@+id/add_image_fl1">
+
+        <ImageView
+            android:id="@+id/add_image_iv2"
+            android:layout_width="match_parent"
+            android:clickable="false"
+            android:visibility="invisible"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/add_image" />
+        <ImageView
+            android:id="@+id/delete_image_2"
+            android:layout_width="20dp"
+            android:visibility="gone"
+            android:layout_height="20dp"
+            android:layout_gravity="top|right"
+            app:srcCompat="@drawable/delete_icon" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/add_image_fl3"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:layout_constraintBottom_toBottomOf="@+id/add_image_fl2"
+        app:layout_constraintEnd_toStartOf="@+id/add_image_fl4"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/add_image_fl2"
+        app:layout_constraintTop_toTopOf="@+id/add_image_fl2">
+
+
+        <ImageView
+            android:id="@+id/add_image_iv3"
+            android:clickable="false"
+            android:visibility="invisible"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:srcCompat="@drawable/add_image" />
+
+        <ImageView
+            android:id="@+id/delete_image_3"
+            android:layout_width="20dp"
+            android:visibility="gone"
+            android:layout_height="20dp"
+            android:layout_gravity="top|right"
+            app:srcCompat="@drawable/delete_icon" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/add_image_fl4"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:layout_constraintBottom_toBottomOf="@+id/add_image_fl3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/add_image_fl3"
+        app:layout_constraintTop_toTopOf="@+id/add_image_fl3">
+
+        <ImageView
+            android:id="@+id/add_image_iv4"
+            android:clickable="false"
+            android:visibility="invisible"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:srcCompat="@drawable/add_image" />
+        <ImageView
+            android:id="@+id/delete_image_4"
+            android:layout_width="20dp"
+            android:visibility="gone"
+            android:layout_height="20dp"
+            android:layout_gravity="top|right"
+            app:srcCompat="@drawable/delete_icon" />
+
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/show_image_num_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="已添加0/4张图片"
         android:textColor="#718398"
-        android:textSize="14dp"
-        app:layout_constraintStart_toStartOf="@+id/add_image_iv"
-        app:layout_constraintTop_toBottomOf="@+id/add_image_iv" />
+        android:textSize="8dp"
+        app:layout_constraintStart_toStartOf="@+id/add_image_fl1"
+        app:layout_constraintTop_toBottomOf="@+id/add_image_fl1" />
 
     <TextView
         android:id="@+id/contact_show_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="18dp"
         android:text="联系方式"
         android:textSize="18dp"
         app:layout_constraintStart_toStartOf="@+id/show_image_num_tv"
@@ -96,10 +330,10 @@
         android:layout_height="wrap_content"
         android:background="@null"
         android:ems="11"
-        android:textCursorDrawable="@drawable/cursor"
         android:hint="请输入手机号和邮箱地址"
         android:inputType="text"
         android:textColorHint="#bec4cf"
+        android:textCursorDrawable="@drawable/cursor"
         android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="@+id/contact_show_tv"
         app:layout_constraintEnd_toEndOf="parent"
@@ -111,7 +345,7 @@
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:background="#eeeef0"
         app:layout_constraintTop_toBottomOf="@+id/contact_show_tv"
         tools:layout_editor_absoluteX="12dp" />
@@ -121,7 +355,7 @@
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/checkbox_selector"
         android:button="@android:color/transparent"
         app:layout_constraintStart_toStartOf="parent"
@@ -131,9 +365,9 @@
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="10dp"
         android:layout_marginLeft="5dp"
         android:text="已阅读并同意"
+        android:textSize="10dp"
         app:layout_constraintBottom_toBottomOf="@+id/checkbox"
         app:layout_constraintStart_toEndOf="@+id/checkbox"
         app:layout_constraintTop_toTopOf="@+id/checkbox" />
@@ -142,11 +376,11 @@
         android:id="@+id/personal_protect_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="10dp"
-        android:text="《个人信息保护声明》"
         android:layout_marginLeft="3dp"
         android:layout_marginRight="3dp"
+        android:text="《个人信息保护声明》"
         android:textColor="#1e73eb"
+        android:textSize="10dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView6"
         app:layout_constraintStart_toEndOf="@+id/textView6"
         app:layout_constraintTop_toTopOf="@+id/textView6" />
@@ -165,11 +399,11 @@
     <TextView
         android:id="@+id/privacy_polite_tv"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="3dp"
         android:layout_marginRight="3dp"
-        android:layout_height="wrap_content"
-        android:textColor="#1e73eb"
         android:text="《汽车之家隐私政策》"
+        android:textColor="#1e73eb"
         android:textSize="10dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView8"
         app:layout_constraintStart_toEndOf="@+id/textView8"
@@ -179,17 +413,26 @@
         android:id="@+id/submit_tv"
         android:layout_width="0dp"
         android:layout_height="40dp"
-        android:background="#bec3ce"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"
         android:layout_marginLeft="12dp"
+        android:layout_marginTop="16dp"
         android:layout_marginRight="12dp"
+        android:background="#bec3ce"
         android:gravity="center"
         android:text="提交"
         android:textColor="#dee0e6"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/checkbox" />
+
+<!--    <ImageView-->
+<!--        android:id="@+id/imageViewTest"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        tools:srcCompat="@tools:sample/avatars" />-->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

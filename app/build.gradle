@@ -47,6 +47,7 @@ dependencies {
     implementation libs.converter.gson
     implementation libs.retrofit2.kotlin.coroutines.adapter
     implementation libs.happy.dns
-    implementation "androidx.room:room-rxjava2:2.2.0"
+    implementation "androidx.room:room-rxjava2:2.6.1"
     implementation (name: 'HTTPDNS_Android_v4.9.1a_release', ext: 'aar')
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
 }
