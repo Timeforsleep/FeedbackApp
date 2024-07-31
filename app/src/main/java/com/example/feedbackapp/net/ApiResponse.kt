@@ -1,4 +1,4 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.net
 
 import com.google.gson.annotations.SerializedName
 

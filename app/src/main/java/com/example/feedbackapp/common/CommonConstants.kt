@@ -1,4 +1,4 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.common
 
 const val BASE_URL = "http://1ef17ae3.r3.cpolar.cn/api/advice/"
 
@@ -14,3 +14,4 @@ const val REPLY_TYPE_REPLY = 2
 
 const val FUC_ERROR = 0
 const val PRODUCT_ERROR = 1
+

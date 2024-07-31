@@ -1,4 +1,4 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

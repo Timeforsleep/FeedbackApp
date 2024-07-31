@@ -1,5 +1,6 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.net
 
+import com.example.feedbackapp.net.HttpDns
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit

@@ -1,7 +1,6 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.adapter
 import android.graphics.Rect
 import android.view.View
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class SimpleGridSpacingItemDecoration(private val spacing: Int) : RecyclerView.ItemDecoration() {

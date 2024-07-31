@@ -1,12 +1,7 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.net
 
-import com.qiniu.android.dns.DnsManager
-import com.qiniu.android.dns.IResolver
-import com.qiniu.android.dns.NetworkInfo
 import com.tencent.msdk.dns.MSDKDnsResolver
 import okhttp3.Dns
-import okhttp3.Dns.SYSTEM
-import java.io.IOException
 import java.net.InetAddress
 import java.net.UnknownHostException
 

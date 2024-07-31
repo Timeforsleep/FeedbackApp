@@ -1,6 +1,8 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.net
 
 import android.util.Log
+import com.example.feedbackapp.common.BASE_URL
+import com.example.feedbackapp.bean.FeedbackHistoryBean
 import com.example.feedbackapp.bean.FeedbackRequest
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +40,21 @@ object NetworkInstance {
 
     fun submitFeedback(feedbackRequest: FeedbackRequest): Flow<ApiResponse<Int>> = flow {
         val response = apiService.addFeedback(feedbackRequest)
+        Log.w("FeedbackViewModel", "submitFeedback: $response")
+        emit(response)
+    }.flowOn(Dispatchers.IO)
+        .retry(retries = 1) { e ->
+            // 仅在特定条件下重试，例如网络问题
+            e is IOException
+        }
+        .catch { e ->
+            // 处理异常，例如记录日志或发出错误通知
+            Log.e("FeedbackViewModel", "Error occurred: ${e.message}")
+            // 这里也可以通过 emit 发送一个错误结果，视需求而定
+        }
+
+    fun getFeedbackHistory(userId:Int): Flow<ApiResponse<List<FeedbackHistoryBean>>> = flow {
+        val response = apiService.getFeedbackHistory(userId)
         Log.w("FeedbackViewModel", "submitFeedback: $response")
         emit(response)
     }.flowOn(Dispatchers.IO)

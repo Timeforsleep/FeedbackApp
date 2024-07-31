@@ -1,4 +1,4 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.adapter
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.feedbackapp.viewmodel.MainViewModel
+import com.example.feedbackapp.R
 import com.example.feedbackapp.bean.TypeBean
 import com.example.feedbackapp.util.CommonUtil
 

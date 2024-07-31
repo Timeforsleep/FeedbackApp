@@ -1,4 +1,4 @@
-package com.example.feedbackapp
+package com.example.feedbackapp.activity
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -26,8 +26,16 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.feedbackapp.R
+import com.example.feedbackapp.adapter.QuestionTypeAdapter
+import com.example.feedbackapp.adapter.SimpleGridSpacingItemDecoration
 import com.example.feedbackapp.bean.TypeBean
+import com.example.feedbackapp.common.EMERGENCY_IMPORTANT
+import com.example.feedbackapp.common.EMERGENCY_MOST
+import com.example.feedbackapp.common.EMERGENCY_NORMAL
+import com.example.feedbackapp.net.NetworkInstance
 import com.example.feedbackapp.util.CommonUtil
+import com.example.feedbackapp.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -41,10 +49,13 @@ class MainActivity : AppCompatActivity() {
     private val productCL by lazy { findViewById<ConstraintLayout>(R.id.product_type_cl) }
 
     private val submitTV:TextView by lazy { findViewById(R.id.submit_tv) }
+    private val feedbackHistoryTV:TextView by lazy { findViewById(R.id.feedback_history_tv) }
+
+    private val backIV:ImageView by lazy { findViewById(R.id.back_iv) }
 
     private val showImageNumTV:TextView by lazy { findViewById(R.id.show_image_num_tv) }
 
-    private val feedbackET:EditText by lazy { findViewById(R.id.guide_et )}
+    private val feedbackET:EditText by lazy { findViewById(R.id.guide_et)}
 
     private val startTimeET:EditText by lazy { findViewById(R.id.startTime_ed) }
     private val endTimeET:EditText by lazy { findViewById(R.id.endTime_ed) }
@@ -135,17 +146,17 @@ class MainActivity : AppCompatActivity() {
 
         val emergencyTypeObserver = Observer<Int>{emergencyTypeNum->
             when (emergencyTypeNum) {
-                EMERGENCY_IMPORTANT->{
+                EMERGENCY_IMPORTANT ->{
                     importantEmergencyTV.setBackgroundColor(Color.parseColor("#EBF4FF"))
                     normalEmergencyTV.setBackgroundColor(Color.parseColor("#f0f0f0"))
                     mostEmergencyTV.setBackgroundColor(Color.parseColor("#f0f0f0"))
                 }
-                EMERGENCY_NORMAL->{
+                EMERGENCY_NORMAL ->{
                     normalEmergencyTV.setBackgroundColor(Color.parseColor("#EBF4FF"))
                     CommonUtil.setBackGroundGray(mostEmergencyTV)
                     CommonUtil.setBackGroundGray(importantEmergencyTV)
                 }
-                EMERGENCY_MOST->{
+                EMERGENCY_MOST ->{
                     mostEmergencyTV.setBackgroundColor(Color.parseColor("#EBF4FF"))
                     CommonUtil.setBackGroundGray(importantEmergencyTV)
                     CommonUtil.setBackGroundGray(normalEmergencyTV)
@@ -219,6 +230,12 @@ class MainActivity : AppCompatActivity() {
         }
         endTimeET.doAfterTextChanged {
             mainViewModel.endTime.value = it.toString()
+        }
+        feedbackHistoryTV.setOnClickListener {
+            startActivity(Intent(this, FeedbackHistoryActivity::class.java))
+        }
+        backIV.setOnClickListener {
+            onBackPressed()
         }
     }
 
