@@ -6,18 +6,18 @@ import com.example.feedbackapp.common.REPLY_TYPE_FEEDBACK
 
 // 请求参数数据类
 data class FeedbackRequest(
-    val targetId: Int = 0,
-    val targetType: Int = REPLY_TYPE_FEEDBACK,
-    val userId: Int,
-    val deviceId: String,
-    val status: Int= EMERGENCY_NORMAL,
-    val category: Int = FUC_ERROR,
-    val tagId: Int,
-    val tagName: String,
-    val content: String,
-    val startTime:String = "0",
-    val endTime:String = "24",
-    val photos: List<String>?,
-    val relation: String?,
-    val video:String?
+    var targetId: Int = 0,
+    var targetType: Int = REPLY_TYPE_FEEDBACK,
+    var userId: Int,
+    var deviceId: String,
+    var status: Int= EMERGENCY_NORMAL,
+    var category: Int = FUC_ERROR,
+    var tagId: Int,
+    var tagName: String,
+    var content: String,
+    var startTime:String = "0",
+    var endTime:String = "24",
+    var photos: List<String>?,
+    var relation: String?,
+    var video:String?
 )

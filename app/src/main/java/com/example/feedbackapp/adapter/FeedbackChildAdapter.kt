@@ -45,7 +45,6 @@ class FeedbackChildAdapter(private val context: Context) :
                 holder.tagTV.text ="回复"
                 holder.tagTV.setBackgroundColor(Color.parseColor("#FF8C00"))
             }
-
         }
         holder.contentTV.text = data.content
         val photoAdapter = PhotoAdapter(context)

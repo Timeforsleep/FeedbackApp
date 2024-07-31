@@ -15,3 +15,6 @@ const val REPLY_TYPE_REPLY = 2
 const val FUC_ERROR = 0
 const val PRODUCT_ERROR = 1
 
+//deviceId
+const val DEVICE_ID = "fuck_you"
+

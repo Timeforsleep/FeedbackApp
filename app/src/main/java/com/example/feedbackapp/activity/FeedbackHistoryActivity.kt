@@ -1,5 +1,7 @@
 package com.example.feedbackapp.activity
 
+import AddAlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
@@ -21,6 +23,7 @@ class FeedbackHistoryActivity : AppCompatActivity() {
     private val backIV: ImageView by lazy { findViewById(R.id.back_iv) }
     private val feedbackHistoryRV:RecyclerView by lazy { findViewById(R.id.feedback_history_rv) }
     private val feedbackHistoryAdapter by lazy { FeedbackHistoryAdapter(this@FeedbackHistoryActivity) }
+    var addAlertDialog = AddAlertDialog(this)
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -50,5 +53,11 @@ class FeedbackHistoryActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        addAlertDialog.onActivityResult(requestCode, resultCode, data)
     }
 }

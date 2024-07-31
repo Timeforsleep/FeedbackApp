@@ -61,7 +61,7 @@
         android:id="@+id/feedback_process_tv"
         android:text="反馈进度"
         android:layout_marginRight="8dp"
-        android:textColor="#0056f1"
+        android:textColor="#2E8B57"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/additional_description_tv"
