@@ -9,12 +9,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
-import okhttp3.ConnectionPool
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 object NetworkInstance {
 
@@ -27,8 +24,8 @@ object NetworkInstance {
 
     private val apiService = retrofit.create(ApiService::class.java)
 
-    fun getUser(): Flow<ApiResponse<Map<String, String>>> = flow {
-        val response = apiService.getUser()
+    fun getProblemScene(): Flow<ApiResponse<Map<String, String>>> = flow {
+        val response = apiService.getProblemScene()
         Log.w("gyk", "getUser:${response} ", )
         emit(response)
     }.flowOn(Dispatchers.IO).retry(retries = 1) { e ->

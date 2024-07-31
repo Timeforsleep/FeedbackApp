@@ -71,13 +71,13 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout2"
+        android:id="@+id/func_type_cl"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="12dp"
         android:layout_marginTop="8dp"
         android:layout_marginRight="12dp"
-        android:background="#F0F0F0"
+        android:background="#EBF4FF"
         android:padding="8dp"
         android:translationZ="1dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
@@ -108,7 +108,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/product_type_cl"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="12dp"
@@ -118,7 +118,7 @@
         android:translationZ="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toTopOf="@+id/constraintLayout2">
+        app:layout_constraintTop_toTopOf="@+id/func_type_cl">
 
         <TextView
             android:id="@+id/product_show_tv"
@@ -173,7 +173,7 @@
         android:text="问题发生的场景"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
+        app:layout_constraintTop_toBottomOf="@+id/func_type_cl" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/question_type_rv"
@@ -214,9 +214,9 @@
         <ImageView
             android:id="@+id/delete_image_1"
             android:layout_width="20dp"
-            android:visibility="gone"
             android:layout_height="20dp"
             android:layout_gravity="top|right"
+            android:visibility="gone"
             app:srcCompat="@drawable/delete_icon" />
     </FrameLayout>
 
@@ -233,16 +233,17 @@
         <ImageView
             android:id="@+id/add_image_iv2"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:clickable="false"
             android:visibility="invisible"
-            android:layout_height="match_parent"
             app:srcCompat="@drawable/add_image" />
+
         <ImageView
             android:id="@+id/delete_image_2"
             android:layout_width="20dp"
-            android:visibility="gone"
             android:layout_height="20dp"
             android:layout_gravity="top|right"
+            android:visibility="gone"
             app:srcCompat="@drawable/delete_icon" />
 
     </FrameLayout>
@@ -260,18 +261,18 @@
 
         <ImageView
             android:id="@+id/add_image_iv3"
-            android:clickable="false"
-            android:visibility="invisible"
             android:layout_width="60dp"
             android:layout_height="60dp"
+            android:clickable="false"
+            android:visibility="invisible"
             app:srcCompat="@drawable/add_image" />
 
         <ImageView
             android:id="@+id/delete_image_3"
             android:layout_width="20dp"
-            android:visibility="gone"
             android:layout_height="20dp"
             android:layout_gravity="top|right"
+            android:visibility="gone"
             app:srcCompat="@drawable/delete_icon" />
     </FrameLayout>
 
@@ -287,17 +288,18 @@
 
         <ImageView
             android:id="@+id/add_image_iv4"
-            android:clickable="false"
-            android:visibility="invisible"
             android:layout_width="60dp"
             android:layout_height="60dp"
+            android:clickable="false"
+            android:visibility="invisible"
             app:srcCompat="@drawable/add_image" />
+
         <ImageView
             android:id="@+id/delete_image_4"
             android:layout_width="20dp"
-            android:visibility="gone"
             android:layout_height="20dp"
             android:layout_gravity="top|right"
+            android:visibility="gone"
             app:srcCompat="@drawable/delete_icon" />
 
 
@@ -359,7 +361,7 @@
         android:background="@drawable/checkbox_selector"
         android:button="@android:color/transparent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view" />
+        app:layout_constraintTop_toBottomOf="@+id/startTime_ed" />
 
     <TextView
         android:id="@+id/textView6"
@@ -414,25 +416,118 @@
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginLeft="12dp"
-        android:layout_marginTop="16dp"
         android:layout_marginRight="12dp"
         android:background="#bec3ce"
+        android:clickable="false"
         android:gravity="center"
         android:text="提交"
         android:textColor="#dee0e6"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/normal_emergency_tv" />
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/imageViewTest"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        tools:srcCompat="@tools:sample/avatars" />-->
+
+    <TextView
+        android:id="@+id/emergency_show_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="12dp"
+        android:text="紧急程度"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/checkbox" />
 
-<!--    <ImageView-->
-<!--        android:id="@+id/imageViewTest"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        tools:srcCompat="@tools:sample/avatars" />-->
+    <TextView
+        android:id="@+id/normal_emergency_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:background="#EBF4FF"
+        android:padding="8dp"
+        android:gravity="center"
+        android:text="一般"
+        android:translationZ="1dp"
+        app:layout_constraintEnd_toStartOf="@+id/important_emergency_tv"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/emergency_show_tv" />
+
+    <TextView
+        android:id="@+id/important_emergency_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:background="#f0f0f0"
+        android:padding="8dp"
+        android:gravity="center"
+        android:text="重要"
+        android:translationZ="1dp"
+        app:layout_constraintBottom_toBottomOf="@+id/normal_emergency_tv"
+        app:layout_constraintEnd_toStartOf="@+id/most_emergency_tv"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/normal_emergency_tv"
+        app:layout_constraintTop_toTopOf="@+id/normal_emergency_tv" />
+
+    <TextView
+        android:id="@+id/most_emergency_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:background="#f0f0f0"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="紧急"
+        android:translationZ="1dp"
+        app:layout_constraintBottom_toBottomOf="@+id/important_emergency_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/important_emergency_tv"
+        app:layout_constraintTop_toTopOf="@+id/important_emergency_tv" />
+
+    <EditText
+        android:id="@+id/startTime_ed"
+        android:layout_width="0dp"
+        android:textSize="14dp"
+        android:background="@null"
+        android:visibility="gone"
+        android:layout_margin="8dp"
+        android:layout_height="wrap_content"
+        android:textCursorDrawable="@drawable/cursor"
+        android:hint="方便的联系的开始时间"
+        android:textColorHint="#bec4cf"
+        android:ems="10"
+        android:inputType="text"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view" />
+
+    <EditText
+        android:id="@+id/endTime_ed"
+        android:textCursorDrawable="@drawable/cursor"
+        android:layout_width="0dp"
+        android:textSize="14dp"
+        android:visibility="gone"
+        android:background="@null"
+        android:layout_margin="8dp"
+        android:layout_height="wrap_content"
+        android:hint="方便的联系的结束时间"
+        android:textColorHint="#bec4cf"
+        android:ems="10"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/view" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

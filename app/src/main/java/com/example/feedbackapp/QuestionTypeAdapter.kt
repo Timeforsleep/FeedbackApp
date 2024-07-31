@@ -1,6 +1,7 @@
 package com.example.feedbackapp
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,9 +9,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.feedbackapp.bean.TypeBean
+import com.example.feedbackapp.util.CommonUtil
 
-class QuestionTypeAdapter:RecyclerView.Adapter<QuestionTypeAdapter.questionTypeViewHolder>() {
+class QuestionTypeAdapter(private val viewModel: MainViewModel):RecyclerView.Adapter<QuestionTypeAdapter.questionTypeViewHolder>() {
     val questionTypeList:MutableList<TypeBean> = mutableListOf()
+    var questionTypeSeleted: TypeBean? = viewModel.questionSelectedScene.value
 
     inner class questionTypeViewHolder(view: View):RecyclerView.ViewHolder(view){
         val questionTypeTxt = view.findViewById<TextView>(R.id.type_tv)
@@ -23,6 +26,12 @@ class QuestionTypeAdapter:RecyclerView.Adapter<QuestionTypeAdapter.questionTypeV
         this.questionTypeList.addAll(newList)
         notifyDataSetChanged()
     }
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateSelectedTypeBean(newTypeBean: TypeBean) {
+        Log.w("gyk", "updateSelectedTypeBean: ", )
+        this.questionTypeSeleted = newTypeBean
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): questionTypeViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_type,parent,false)
@@ -32,8 +41,17 @@ class QuestionTypeAdapter:RecyclerView.Adapter<QuestionTypeAdapter.questionTypeV
     override fun getItemCount(): Int = questionTypeList.size
 
     override fun onBindViewHolder(holder: questionTypeViewHolder, position: Int) {
-        val data = questionTypeList[position];
+        val data = questionTypeList[position]
+        if (questionTypeSeleted?.typeName == data.typeName && questionTypeSeleted?.id == data.id) {
+            CommonUtil.setBackGroundBlue(holder.itemView)
+        }else{
+            CommonUtil.setBackGroundGray(holder.itemView)
+        }
         holder.questionTypeTxt.text = data.typeName
+        holder.itemView.setOnClickListener {
+            CommonUtil.setBackGroundBlue(it)
+            viewModel.questionSelectedScene.value = TypeBean(data.id, data.typeName)
+        }
 //        Glide.with(holder.itemView)
 //            .load(data.iconUrl)
 //            .placeholder(R.drawable.add_image)

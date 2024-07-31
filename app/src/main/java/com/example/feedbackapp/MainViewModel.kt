@@ -5,6 +5,23 @@ import androidx.lifecycle.ViewModel
 import com.example.feedbackapp.bean.TypeBean
 
 class MainViewModel:ViewModel() {
-    // 定义一个 LiveData 或其他状态管理器来保存结果
-    val typeBeans = MutableLiveData<List<TypeBean>>()
+
+    val isFucError : MutableLiveData<Boolean> = MutableLiveData(true)
+
+    val questionType:MutableLiveData<Int> = MutableLiveData(0)
+
+    val questionSceneList:MutableList<TypeBean> = mutableListOf()
+
+    val questionSelectedScene:MutableLiveData<TypeBean> = MutableLiveData()
+
+    val isAgreeIssue = false
+
+    val feedbackContent:MutableLiveData<String> = MutableLiveData("")
+
+    val relationNumber:MutableLiveData<String> = MutableLiveData("")
+
+    val startTime:MutableLiveData<String> =MutableLiveData("0")
+
+    val endTime: MutableLiveData<String> = MutableLiveData("24")
+
 }
