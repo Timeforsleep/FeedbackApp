@@ -42,15 +42,82 @@ object CommonUtil {
         imageView.setImageBitmap(bitmap)
     }
 
-    fun uriToBase64(uri: Uri, activity: Activity): String? {
-        val inputStream: InputStream? = activity.contentResolver.openInputStream(uri)
-        val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
+    fun uriToBase64(uri: Uri, activity: Activity, imageView: ImageView): String? {
+        var inputStream: InputStream? = activity.contentResolver.openInputStream(uri)
+        val options = BitmapFactory.Options().apply {
+            // Set inJustDecodeBounds to true to get the dimensions of the image
+            inJustDecodeBounds = true
+            BitmapFactory.decodeStream(inputStream, null, this)
+            inputStream?.close()
+
+            // Calculate the sample size
+            val imageWidth = outWidth
+            val imageHeight = outHeight
+            val viewWidth = imageView.width
+            val viewHeight = imageView.height
+            inSampleSize = calculateInSampleSize(this, viewWidth, viewHeight)
+
+            // Decode the image with inSampleSize set
+            inJustDecodeBounds = false
+            inputStream = activity.contentResolver.openInputStream(uri)
+        }
+
+        val bitmap: Bitmap? = BitmapFactory.decodeStream(inputStream, null, options)
         inputStream?.close()
 
         val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        bitmap?.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
         val byteArray = outputStream.toByteArray()
         return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
+    fun uriToBase64(uri: Uri, activity: Activity, reqWidth:Int, reqHeight:Int): String? {
+        var inputStream: InputStream? = activity.contentResolver.openInputStream(uri)
+        val options = BitmapFactory.Options().apply {
+            // Set inJustDecodeBounds to true to get the dimensions of the image
+            inJustDecodeBounds = true
+            BitmapFactory.decodeStream(inputStream, null, this)
+            inputStream?.close()
+
+            // Calculate the sample size
+//            val imageWidth = outWidth
+//            val imageHeight = outHeight
+//            val viewWidth = reqWidth
+//            val viewHeight = reqHeight
+            inSampleSize = calculateInSampleSize(this, reqWidth, reqHeight)
+
+            // Decode the image with inSampleSize set
+            inJustDecodeBounds = false
+            inputStream = activity.contentResolver.openInputStream(uri)
+        }
+
+        val bitmap: Bitmap? = BitmapFactory.decodeStream(inputStream, null, options)
+        inputStream?.close()
+
+        val outputStream = ByteArrayOutputStream()
+        bitmap?.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+        val byteArray = outputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        // Raw height and width of image
+        val (height: Int, width: Int) = options.outHeight to options.outWidth
+
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
     }
 
 //    fun createImageUri(context: Context): Uri? {

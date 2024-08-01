@@ -13,7 +13,7 @@ data class FeedbackHistoryBean(
     var tagId: Int,
     var tagName: String,
     var content: String,
-    var relation: String,
+    var relation: String?,
     var schedule:Int?,
     var photos: String?,
     var video: String?,

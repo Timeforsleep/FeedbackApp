@@ -165,7 +165,7 @@ class AddAlertDialog(private val activity: Activity) {
         imageViews?.forEachIndexed { index, imageView ->
             if (index < imageUriList.size) {
                 val imageUri = imageUriList[index]
-                val base64String = imageUri?.let { CommonUtil.uriToBase64(it, activity) }
+                val base64String = imageUri?.let { CommonUtil.uriToBase64(it, activity,activity.windowManager.defaultDisplay.width,activity.windowManager.defaultDisplay.height) }
                 if (base64String != null) {
                     imageUrlList.add(base64String)
                     CommonUtil.loadBase64Image(base64String, imageView!!)

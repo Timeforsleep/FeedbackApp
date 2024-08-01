@@ -2,13 +2,16 @@ package com.example.feedbackapp.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
+import coil.load
 import com.example.feedbackapp.R
+import com.example.feedbackapp.activity.WatchPicActivity
+import com.example.feedbackapp.util.CommonUtil
 
 class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
     
@@ -32,13 +35,24 @@ class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAda
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         val photoUrl = photosList[position]
-//            holder.photoImageView.load(photoUrl){
-//                crossfade(true)
-//                placeholder(R.drawable.add_image)
-//            }
-        Glide.with(context)
-            .load(photoUrl)
-            .into(holder.photoImageView)
+        holder.photoImageView.setOnClickListener {
+            val intent = Intent(context, WatchPicActivity::class.java)
+            intent.putExtra("photoUrl", photoUrl)
+            context.startActivity(intent)
+        }
+        try {
+            CommonUtil.loadBase64Image(photoUrl, holder.photoImageView)
+        } catch (e: Exception) {
+
+            holder.photoImageView.load(photoUrl){
+                crossfade(true)
+                placeholder(R.drawable.add_image)
+            }
+        }
+//        Glide.with(context)
+//            .load(photoUrl)
+//            .placeholder(R.drawable.add_image)
+//            .into(holder.photoImageView)
     }
 
     override fun getItemCount(): Int = photosList.size

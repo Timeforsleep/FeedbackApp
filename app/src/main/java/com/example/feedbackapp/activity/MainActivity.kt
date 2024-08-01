@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity() {
                     tagId = mainViewModel.questionSelectedScene.value!!.id.toInt(),
                     tagName = mainViewModel.questionSelectedScene.value!!.typeName,
                     content = mainViewModel.feedbackContent.value!!,
-                    relation = mainViewModel.relationNumber.value!!,
+                    relation = mainViewModel.relationNumber.value,
                     photos = imageUrlList,
                     video = null,
                     startTime = mainViewModel.startTime.value!!.toIntOrNull(),
@@ -323,7 +323,7 @@ class MainActivity : AppCompatActivity() {
         imageViews?.forEachIndexed { index, imageView ->
             if (index < imageUriList.size) {
                 val imageUri = imageUriList[index]
-                val base64String = imageUri?.let { CommonUtil.uriToBase64(it, this) }
+                val base64String = imageUri?.let { CommonUtil.uriToBase64(it, this,windowManager.defaultDisplay.width,windowManager.defaultDisplay.height) }
                 if (base64String != null) {
                     imageUrlList.add(base64String)
                     CommonUtil.loadBase64Image(base64String, imageView!!)

@@ -24,6 +24,9 @@
         android:theme="@style/SplashScreen"
         tools:targetApi="31">
         <activity
+            android:name=".activity.WatchPicActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.FeedbackHistoryActivity"
             android:exported="false" />
         <activity
