@@ -2,7 +2,7 @@ package com.example.feedbackapp.adapter
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,10 +55,27 @@ class FeedbackHistoryAdapter(private val activity: Activity) :
             timeTV.text = feedback.modifiedTime
             contentTV.text = feedback.content
             tagTV.text = feedback.tagName
+            feedback.schedule?.let {
+                schedule->
+                when (schedule) {
+                    0->{
+                        feedbackProcessTV.setTextColor(Color.RED)
+                        feedbackProcessTV.text="未受理"
+                    }
+                    1->{
+                        feedbackProcessTV.setTextColor(Color.GRAY)
+                        feedbackProcessTV.text="处理中"
+                    }
+                    2->{
+                        feedbackProcessTV.setTextColor(Color.parseColor("#2E8B57"))
+                        feedbackProcessTV.text="处理完成"
+                    }
+                }
+            }
             additionalDescriptionTV.setOnClickListener {
                 (activity as FeedbackHistoryActivity).addAlertDialog.feedbackRequest =
                     FeedbackRequest(
-                        targetId = feedback.targetId,
+                        targetId = feedback.id,
                         targetType = REPLY_TYPE_ADD,
                         userId = feedback.userId,
                         deviceId = feedback.deviceId,
@@ -69,32 +86,39 @@ class FeedbackHistoryAdapter(private val activity: Activity) :
                         content = feedback.content,
                         photos = null,
                         relation = null,
-                        video = null)
+                        video = null,
+                        startTime = null,
+                        endTime = null)
 
                 (activity as FeedbackHistoryActivity).addAlertDialog.show()
             }
 
             // Set up photo RecyclerView
-            if (!feedback.photoList.isNullOrEmpty()) {
+            if (feedback.photoList != null) {
+                photoRecyclerView.visibility = View.VISIBLE
                 val photoAdapter = PhotoAdapter(activity)
                 photoRecyclerView.adapter = photoAdapter
-                photoAdapter.updatePhotosList(feedback.photoList)
+                photoAdapter.updatePhotosList(feedback.photoList!!)
                 photoRecyclerView.layoutManager =
                     LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
                 val spacingInPixels = CommonUtil.dpToPx(8f, itemView.context) // 将dp转换为像素
                 val itemDecoration = SimpleGridSpacingItemDecoration(spacingInPixels)
-                photoRecyclerView.addItemDecoration(itemDecoration)
+            } else {
+                photoRecyclerView.visibility = View.GONE
             }
 
             // Set up children RecyclerView if there are children
             if (!feedback.children.isNullOrEmpty()) {
+                childrenRecyclerView.visibility = View.VISIBLE
                 val feedbackChildAdapter = FeedbackChildAdapter(activity)
                 childrenRecyclerView.adapter = feedbackChildAdapter
                 feedbackChildAdapter.updateFeedbackChildrenList(feedback.children!!)
                 childrenRecyclerView.layoutManager = LinearLayoutManager(itemView.context)
                 val spacingInPixels = CommonUtil.dpToPx(8f, itemView.context) // 将dp转换为像素
                 val itemDecoration = SimpleGridSpacingItemDecoration(spacingInPixels)
-                photoRecyclerView.addItemDecoration(itemDecoration)
+//                photoRecyclerView.addItemDecoration(itemDecoration)
+            } else {
+                childrenRecyclerView.visibility = View.GONE
             }
         }
     }

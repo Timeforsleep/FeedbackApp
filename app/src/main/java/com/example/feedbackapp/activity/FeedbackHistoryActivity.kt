@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.feedbackapp.R
 import com.example.feedbackapp.adapter.FeedbackHistoryAdapter
-import com.example.feedbackapp.bean.TypeBean
 import com.example.feedbackapp.net.NetworkInstance
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -24,6 +23,11 @@ class FeedbackHistoryActivity : AppCompatActivity() {
     private val feedbackHistoryRV:RecyclerView by lazy { findViewById(R.id.feedback_history_rv) }
     private val feedbackHistoryAdapter by lazy { FeedbackHistoryAdapter(this@FeedbackHistoryActivity) }
     var addAlertDialog = AddAlertDialog(this)
+
+    // 对话框消失时的回调
+    fun onDialogDismissed() {
+        refreshFeedbackHistory()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -37,9 +41,17 @@ class FeedbackHistoryActivity : AppCompatActivity() {
         backIV.setOnClickListener {
             onBackPressed()
         }
+        refreshFeedbackHistory()
+    }
+
+//    override fun onResume() {
+//        super.onResume()
+//        Log.w("onResu", "onResume: ", )
+//    }
+
+    fun refreshFeedbackHistory() {
         lifecycleScope.launch {
             NetworkInstance.getFeedbackHistory(18809761).collectLatest {
-                Log.w("gyk", "onCreate: ${it.result}")
 //                mainViewModel.typeBeans.value = it.result
                 if (it.returnCode == 0) {
                     // 将 Map 转换为 List<TypeBean>
@@ -55,9 +67,9 @@ class FeedbackHistoryActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         addAlertDialog.onActivityResult(requestCode, resultCode, data)
     }
+
 }

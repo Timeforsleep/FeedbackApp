@@ -30,7 +30,6 @@ class QuestionTypeAdapter(private val viewModel: MainViewModel):RecyclerView.Ada
     }
     @SuppressLint("NotifyDataSetChanged")
     fun updateSelectedTypeBean(newTypeBean: TypeBean) {
-        Log.w("gyk", "updateSelectedTypeBean: ", )
         this.questionTypeSeleted = newTypeBean
         notifyDataSetChanged()
     }

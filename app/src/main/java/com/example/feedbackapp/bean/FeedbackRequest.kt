@@ -15,8 +15,8 @@ data class FeedbackRequest(
     var tagId: Int,
     var tagName: String,
     var content: String,
-    var startTime:String = "0",
-    var endTime:String = "24",
+    var startTime:Int?,
+    var endTime:Int?,
     var photos: List<String>?,
     var relation: String?,
     var video:String?

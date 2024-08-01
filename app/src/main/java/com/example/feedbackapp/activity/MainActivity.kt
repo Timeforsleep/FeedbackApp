@@ -1,11 +1,15 @@
 package com.example.feedbackapp.activity
 
+
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -15,11 +19,14 @@ import android.view.WindowManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
@@ -29,17 +36,26 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.feedbackapp.R
 import com.example.feedbackapp.adapter.QuestionTypeAdapter
 import com.example.feedbackapp.adapter.SimpleGridSpacingItemDecoration
+import com.example.feedbackapp.bean.FeedbackRequest
 import com.example.feedbackapp.bean.TypeBean
+import com.example.feedbackapp.common.DEVICE_ID
 import com.example.feedbackapp.common.EMERGENCY_IMPORTANT
 import com.example.feedbackapp.common.EMERGENCY_MOST
 import com.example.feedbackapp.common.EMERGENCY_NORMAL
+import com.example.feedbackapp.common.USER_ID
 import com.example.feedbackapp.net.NetworkInstance
 import com.example.feedbackapp.util.CommonUtil
 import com.example.feedbackapp.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
+    private var currentPhotoPath: String? = null
     //用于提交的bean类
 //    private val feedbackRequest = FeedbackRequest()
 //    private val imageTest by lazy{findViewById<ImageView>(R.id.imageViewTest)}
@@ -113,7 +129,6 @@ class MainActivity : AppCompatActivity() {
 //            .into(imageTest)
         lifecycleScope.launch {
             NetworkInstance.getProblemScene().collectLatest {
-                Log.w("gyk", "onCreate: ${it.result}")
 //                mainViewModel.typeBeans.value = it.result
                 if (it.returnCode == 0) {
                     // 将 Map 转换为 List<TypeBean>
@@ -177,7 +192,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         val problemSceneObserver = Observer<TypeBean>{newTypeBean->
-            Log.w("gyk", "onCreate: newBean${newTypeBean.id}    ${newTypeBean.typeName}", )
             questionTypeAdapter.updateSelectedTypeBean(newTypeBean)
         }
 
@@ -185,6 +199,9 @@ class MainActivity : AppCompatActivity() {
             if (newRelationNumber.isNotEmpty()) {
                 startTimeET.visibility = View.VISIBLE
                 endTimeET.visibility = View.VISIBLE
+            } else {
+                startTimeET.visibility = View.GONE
+                endTimeET.visibility = View.GONE
             }
         }
 
@@ -237,6 +254,35 @@ class MainActivity : AppCompatActivity() {
         backIV.setOnClickListener {
             onBackPressed()
         }
+        submitTV.setOnClickListener {
+            Log.w("gyk", "setupListeners: ", )
+            lifecycleScope.launch {
+                NetworkInstance.submitFeedback(FeedbackRequest(
+                    targetId = 0,
+                    targetType = 0,
+                    userId = USER_ID,
+                    deviceId = DEVICE_ID,
+                    status = mainViewModel.questionType.value!!,
+                    category = if (mainViewModel.isFucError.value!!) 0 else 1,
+                    tagId = mainViewModel.questionSelectedScene.value!!.id.toInt(),
+                    tagName = mainViewModel.questionSelectedScene.value!!.typeName,
+                    content = mainViewModel.feedbackContent.value!!,
+                    relation = mainViewModel.relationNumber.value!!,
+                    photos = imageUrlList,
+                    video = null,
+                    startTime = mainViewModel.startTime.value!!.toIntOrNull(),
+                    endTime = mainViewModel.endTime.value!!.toIntOrNull()
+                )).collectLatest {
+                    if (it.returnCode == 0) {
+                        // 将 Map 转换为 List<TypeBean>
+                        Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // 处理 API 错误，例如记录日志
+                        Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun openImagePicker() {
@@ -246,12 +292,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK) {
+        if ((requestCode == REQUEST_PICK_IMAGE) && resultCode == RESULT_OK) {
             data?.data?.let { selectedImageUri ->
                 if (imageUriList.size < 4) {
                     imageUriList.add(selectedImageUri)
                     updateImageViews()
                 }
+            }
+        }
+        if ((requestCode == REQUEST_IMAGE_CAPTURE) && resultCode == RESULT_OK){
+            if (imageUriList.size < 4) {
+                val file = currentPhotoPath?.let { File(it) }
+                val uri = Uri.fromFile(file)
+                imageUriList.add(uri)
+                updateImageViews()
             }
         }
         dismissAlertDialog()
@@ -265,40 +319,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateImageViews() {
-        imageUrlList.clear() // 清空之前的文件名列表
-        imageViews.forEachIndexed { index, imageView ->
+        imageUrlList.clear()
+        imageViews?.forEachIndexed { index, imageView ->
             if (index < imageUriList.size) {
                 val imageUri = imageUriList[index]
-                imageView.setImageURI(imageUri)
-                deleteImageViews[index].visibility = View.VISIBLE
-                // 获取并显示文件名
-                val fileName = imageUri?.let { CommonUtil.getFileNameFromUri(this, it) }
-                if (fileName != null) {
-                    imageUrlList.add(fileName)
+                val base64String = imageUri?.let { CommonUtil.uriToBase64(it, this) }
+                if (base64String != null) {
+                    imageUrlList.add(base64String)
+                    CommonUtil.loadBase64Image(base64String, imageView!!)
                 }
+                deleteImageViews!![index]?.visibility = View.VISIBLE
             } else {
-                imageView.setImageURI(null)
-                imageView.isClickable = index == imageUriList.size
-                imageView.isVisible = index == imageUriList.size
-                deleteImageViews[index].visibility = View.GONE
-                imageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.add_image))
+                imageView?.setImageURI(null)
+                imageView?.isClickable = index == imageUriList.size
+                imageView?.isVisible = index == imageUriList.size
+                deleteImageViews!![index]?.visibility = View.GONE
+                imageView?.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.add_image))
             }
         }
-        // 打印文件名列表
-        Log.w("gyk", "updateImageViews: ${imageUrlList}")
-        showImageNumTV.text = "已添加${imageUriList.size}/4张图片"
-//        Log.w("gyk", "updateImageViews: ${imageUriList}", )
-//        imageUriList.forEach { uri ->
-//            uri?.let {
-//                Log.w("gyk", "updateImageViews: ${CommonUtil.getFileNameFromUri(this, it)}",)
-//                Glide.with(this)
-//                    .load(it)
-//                    .into(imageTest)
-//            }
-//        }
-
-
-    }
+        showImageNumTV?.text = "已添加${imageUriList.size}/4张图片"
+        }
 
     fun showCustomDialog(context: Context) {
         // 创建布局填充器
@@ -317,10 +357,22 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
 
+//        // 这里设置了弹窗的背景透明
+//        alertDialog!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
+//        val window = alertDialog!!.window
+//        window?.setContentView(dialogView)
+//
+//        // 使弹窗的宽度占满屏幕的宽度
+//        window?.setLayout(
+//            WindowManager.LayoutParams.MATCH_PARENT,
+//            WindowManager.LayoutParams.WRAP_CONTENT
+//        )
+
         // 设置点击事件
         takePhotoTV.setOnClickListener {
             // 处理拍照逻辑
-            openImagePicker()
+            // 请求相机和存储权限
+            requestCameraPermission()
         }
 
         chooseAlbumTV.setOnClickListener {
@@ -344,6 +396,62 @@ class MainActivity : AppCompatActivity() {
         alertDialog?.show()
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            dispatchTakePictureIntent()
+        } else {
+            // 相机权限被拒绝
+        }
+    }
+
+    // 请求相机权限
+    private fun requestCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_IMAGE_CAPTURE)
+        } else {
+            dispatchTakePictureIntent()
+        }
+    }
+
+    // 拍照并存储照片路径
+    private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            takePictureIntent.resolveActivity(packageManager)?.also {
+                // 创建用于保存照片的文件
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    null
+                }
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        this,
+                        "gyk.fileprovider",
+                        it
+                    )
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                }
+            }
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_",
+            ".jpg",
+            storageDir
+        ).apply {
+            currentPhotoPath = absolutePath
+        }
+    }
+
 
     private fun dismissAlertDialog(){
         alertDialog?.dismiss()
@@ -352,15 +460,13 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_PICK_IMAGE = 1
+        private const val REQUEST_IMAGE_CAPTURE = 2
+        // 权限请求码
+        private const val CAMERA_REQUEST_CODE = 100
+        private const val STORAGE_REQUEST_CODE = 101
+
     }
 
 }
 
-//super.onCreate(savedInstanceState)
-//enableEdgeToEdge()
-//setContentView(R.layout.activity_main)
-//ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-//    val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//    insets
-//}
+

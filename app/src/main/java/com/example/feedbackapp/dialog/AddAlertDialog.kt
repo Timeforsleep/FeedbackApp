@@ -1,32 +1,43 @@
+
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.core.widget.doOnTextChanged
 import com.example.feedbackapp.R
+import com.example.feedbackapp.activity.FeedbackHistoryActivity
 import com.example.feedbackapp.bean.FeedbackRequest
-import com.example.feedbackapp.bean.TypeBean
 import com.example.feedbackapp.net.NetworkInstance
 import com.example.feedbackapp.util.CommonUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class AddAlertDialog(private val activity: Activity) {
+    private var currentPhotoPath: String? = null
 
     private var addImageIV1: ImageView? = null
     private var addImageIV2: ImageView? = null
@@ -39,6 +50,7 @@ class AddAlertDialog(private val activity: Activity) {
     private var imageViews: List<ImageView?>? = null
     private var deleteImageViews: List<ImageView?>? = null
     private var showImageNumTV: TextView? = null
+    private var sendTV:TextView?=null
 
     var feedbackRequest: FeedbackRequest? = null
 
@@ -46,6 +58,18 @@ class AddAlertDialog(private val activity: Activity) {
     val imageUriList = mutableListOf<Uri?>()
     val imageUrlList = mutableListOf<String>()
 
+    private fun showImagePickerDialog() {
+        val options = arrayOf("选择照片", "拍摄照片")
+        val builder = AlertDialog.Builder(activity)
+        builder.setTitle("添加图片")
+        builder.setItems(options) { _, which ->
+            when (which) {
+                0 -> openImagePicker()
+                1 -> dispatchTakePictureIntent()
+            }
+        }
+        builder.show()
+    }
     fun show() {
         // Inflate the custom layout
         val inflater = LayoutInflater.from(activity)
@@ -55,15 +79,16 @@ class AddAlertDialog(private val activity: Activity) {
         val backIv: ImageView = dialogView.findViewById(R.id.back_iv)
         val textView: TextView = dialogView.findViewById(R.id.textView)
         val addEt: EditText = dialogView.findViewById(R.id.add_et)
-        val sendTv: TextView = dialogView.findViewById(R.id.send_tv)
+        sendTV = dialogView.findViewById(R.id.send_tv)
 
         addEt.doAfterTextChanged{
             feedbackRequest?.content =it.toString()
             if (it.isNullOrEmpty()) {
-                sendTv.setTextColor(Color.parseColor("#DCDCDC"))
-                sendTv.isClickable = false
+                sendTV?.setTextColor(Color.parseColor("#DCDCDC"))
+                sendTV?.isClickable = false
             } else {
-                sendTv.setTextColor(Color.parseColor("#0056f1"))
+                sendTV?.setTextColor(Color.parseColor("#0056f1"))
+                sendTV?.isClickable = true
             }
         }
 
@@ -93,33 +118,42 @@ class AddAlertDialog(private val activity: Activity) {
         // Set up button click listeners
         backIv.setOnClickListener {
             dialog.dismiss()
+            (activity as FeedbackHistoryActivity).refreshFeedbackHistory()
         }
 
-        sendTv.setOnClickListener {
+
+        sendTV?.setOnClickListener {
             if (feedbackRequest != null) {
-                Log.w("gykk", "show1: ", )
+                Log.w("gyk", "show: ${feedbackRequest.toString()}", )
                 CoroutineScope(Dispatchers.IO).launch{
                     NetworkInstance.submitFeedback(feedbackRequest!!).collectLatest {
-                        Log.w("gyk", "onCreate: ${it.result}")
                         if (it.returnCode == 0) {
                             // 将 Map 转换为 List<TypeBean>
-                            Log.w("gykrequest", "show: success", )
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(activity, "追加描述成功！", Toast.LENGTH_SHORT).show()
+                                dialog.dismiss()
+                                (activity as FeedbackHistoryActivity).refreshFeedbackHistory()
+                            }
                         } else {
                             // 处理 API 错误，例如记录日志
-                            Log.e("MyViewModel", "API Error: ${it.message}")
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(activity, "${it.message}", Toast.LENGTH_SHORT).show()
+                                dialog.dismiss()
+                                (activity as FeedbackHistoryActivity).refreshFeedbackHistory()
+                            }
                         }
                     }
                 }
             }
             // Handle the send action here
-            dialog.dismiss()
+
         }
 
         // Handle image view clicks
-        addImageIV1?.setOnClickListener { openImagePicker() }
-        addImageIV2?.setOnClickListener { openImagePicker() }
-        addImageIV3?.setOnClickListener { openImagePicker() }
-        addImageIV4?.setOnClickListener { openImagePicker() }
+        addImageIV1?.setOnClickListener { showImagePickerDialog() }
+        addImageIV2?.setOnClickListener { showImagePickerDialog() }
+        addImageIV3?.setOnClickListener { showImagePickerDialog() }
+        addImageIV4?.setOnClickListener { showImagePickerDialog() }
 
         deleteImageViews?.forEachIndexed { index, deleteView ->
             deleteView?.setOnClickListener { deleteImage(index) }
@@ -131,12 +165,12 @@ class AddAlertDialog(private val activity: Activity) {
         imageViews?.forEachIndexed { index, imageView ->
             if (index < imageUriList.size) {
                 val imageUri = imageUriList[index]
-                imageView?.setImageURI(imageUri)
-                deleteImageViews!![index]?.visibility = View.VISIBLE
-                val fileName = imageUri?.let { CommonUtil.getFileNameFromUri(activity, it) }
-                if (fileName != null) {
-                    imageUrlList.add(fileName)
+                val base64String = imageUri?.let { CommonUtil.uriToBase64(it, activity) }
+                if (base64String != null) {
+                    imageUrlList.add(base64String)
+                    CommonUtil.loadBase64Image(base64String, imageView!!)
                 }
+                deleteImageViews!![index]?.visibility = View.VISIBLE
             } else {
                 imageView?.setImageURI(null)
                 imageView?.isClickable = index == imageUriList.size
@@ -145,19 +179,26 @@ class AddAlertDialog(private val activity: Activity) {
                 imageView?.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.add_image))
             }
         }
-        Log.w("gyk", "updateImageViews: ${imageUrlList}")
         showImageNumTV?.text = "已添加${imageUriList.size}/4张图片"
         feedbackRequest?.photos = imageUrlList
+
+        if (imageUriList.isNotEmpty()) {
+            sendTV?.setTextColor(Color.parseColor("#0056f1"))
+            sendTV?.isClickable = true
+        } else {
+            sendTV?.setTextColor(Color.parseColor("#DCDCDC"))
+            sendTV?.isClickable = false
+        }
     }
+
 
     private fun openImagePicker() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        activity.startActivityForResult(intent, REQUEST_IMAGE_PICK)
+        activity.startActivityForResult(intent, REQUEST_IMAGE_PICK_ADD)
     }
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.w("gykkkk", "onActivityResult: ", )
-        if (requestCode == REQUEST_IMAGE_PICK && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_PICK_ADD && resultCode == Activity.RESULT_OK) {
             val imageUri: Uri? = data?.data
             imageUri?.let {
                 if (imageUriList.size < 4) {
@@ -165,6 +206,58 @@ class AddAlertDialog(private val activity: Activity) {
                     updateImageViews()
                 }
             }
+        }
+        if (requestCode == REQUEST_IMAGE_CAPTURE_ADD && resultCode == Activity.RESULT_OK){
+            val file = File(currentPhotoPath ?: "")
+            val imageUri: Uri = Uri.fromFile(file)
+            if (imageUriList.size < 4) {
+                imageUriList.add(imageUri)
+                updateImageViews()
+            }
+        }
+    }
+    private fun dispatchTakePictureIntent() {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                activity.requestPermissions(
+                    arrayOf(Manifest.permission.CAMERA),
+                    REQUEST_CAMERA_PERMISSION_ADD
+                )
+            }
+        } else {
+            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+                takePictureIntent.resolveActivity(activity.packageManager)?.also {
+                    val photoFile: File? = try {
+                        createImageFile()
+                    } catch (ex: IOException) {
+                        null
+                    }
+                    photoFile?.also {
+                        val photoURI: Uri = FileProvider.getUriForFile(
+                            activity,
+                            "gyk.fileprovider",
+                            it
+                        )
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                        activity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE_ADD)
+                    }
+                }
+            }
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val storageDir: File? = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_",
+            ".jpg",
+            storageDir
+        ).apply {
+            currentPhotoPath = absolutePath
         }
     }
 
@@ -176,6 +269,9 @@ class AddAlertDialog(private val activity: Activity) {
     }
 
     companion object {
-        private const val REQUEST_IMAGE_PICK = 1
+        private const val REQUEST_IMAGE_PICK_ADD = 4
+        private const val REQUEST_IMAGE_CAPTURE_ADD = 5
+        private const val REQUEST_CAMERA_PERMISSION_ADD = 6
+
     }
 }

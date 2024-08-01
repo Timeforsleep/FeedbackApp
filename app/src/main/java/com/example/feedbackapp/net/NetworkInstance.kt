@@ -1,9 +1,9 @@
 package com.example.feedbackapp.net
 
 import android.util.Log
-import com.example.feedbackapp.common.BASE_URL
 import com.example.feedbackapp.bean.FeedbackHistoryBean
 import com.example.feedbackapp.bean.FeedbackRequest
+import com.example.feedbackapp.common.BASE_URL
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +28,6 @@ object NetworkInstance {
 
     fun getProblemScene(): Flow<ApiResponse<Map<String, String>>> = flow {
         val response = apiService.getProblemScene()
-        Log.w("gyk", "getUser:${response} ", )
         emit(response)
     }.flowOn(Dispatchers.IO).retry(retries = 1) { e ->
         // 仅在特定条件下重试，例如网络问题

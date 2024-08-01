@@ -49,11 +49,13 @@ class FeedbackChildAdapter(private val context: Context) :
         holder.contentTV.text = data.content
         val photoAdapter = PhotoAdapter(context)
         holder.photoRecyclerView.adapter = photoAdapter
-        photoAdapter.updatePhotosList(data.photoList)
+        if (data.photoList != null) {
+            photoAdapter.updatePhotosList(data.photoList!!)
+        }
         holder.photoRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
         val spacingInPixels = CommonUtil.dpToPx(8f, holder.itemView.context) // 将dp转换为像素
         val itemDecoration = SimpleGridSpacingItemDecoration(spacingInPixels)
-        holder.photoRecyclerView.addItemDecoration(itemDecoration)
+//        holder.photoRecyclerView.addItemDecoration(itemDecoration)
     }
 
     override fun getItemCount(): Int = feedbackChildrenList.size

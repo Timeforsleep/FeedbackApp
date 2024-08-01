@@ -14,6 +14,7 @@ data class FeedbackHistoryBean(
     var tagName: String,
     var content: String,
     var relation: String,
+    var schedule:Int?,
     var photos: String?,
     var video: String?,
     @SerializedName("createdStime")
@@ -21,7 +22,7 @@ data class FeedbackHistoryBean(
     @SerializedName("modifiedStime")
     var modifiedTime: String,
     var isDel: Int,
-    var photoList: List<String>,
+    var photoList: List<String>?,
     var children: List<FeedbackHistoryBean>?
 ) {
 }

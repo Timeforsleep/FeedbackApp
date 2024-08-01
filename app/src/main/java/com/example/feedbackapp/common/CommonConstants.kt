@@ -1,6 +1,6 @@
 package com.example.feedbackapp.common
 
-const val BASE_URL = "http://1ef17ae3.r3.cpolar.cn/api/advice/"
+const val BASE_URL = "http://6a9309a8.r10.cpolar.top/api/advice/"
 
 
 const val EMERGENCY_NORMAL = 0
@@ -15,6 +15,7 @@ const val REPLY_TYPE_REPLY = 2
 const val FUC_ERROR = 0
 const val PRODUCT_ERROR = 1
 
+const val USER_ID = 18809761
 //deviceId
 const val DEVICE_ID = "fuck_you"
 
