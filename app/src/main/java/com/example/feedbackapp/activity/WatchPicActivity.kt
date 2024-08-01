@@ -1,13 +1,14 @@
 package com.example.feedbackapp.activity
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.feedbackapp.R
-import com.example.feedbackapp.util.CommonUtil
 
 class WatchPicActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,12 +20,24 @@ class WatchPicActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        var base64String = intent.getStringExtra("photoUrl")?:""
-        val quitIV: ImageView = findViewById<ImageView>(R.id.quit_iv)
-        quitIV.setOnClickListener {
-            this.finish()
+        val uri = intent.getStringExtra("photoUrl")?:""
+
+        if (uri.isNotBlank()) {
+            val inputStream = contentResolver.openInputStream(uri.toUri())
+
+            // 将输入流解析为Bitmap
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+
+            // 关闭输入流
+            inputStream!!.close()
+            val photoImageView = findViewById<com.github.chrisbanes.photoview.PhotoView>(R.id.photoImageView)
+            // 显示Bitmap到ImageView
+            photoImageView.setImageBitmap(bitmap)
+            val quitIV: ImageView = findViewById<ImageView>(R.id.quit_iv)
+            quitIV.setOnClickListener {
+                this.finish()
+            }
         }
-        val photoImageView = findViewById<com.github.chrisbanes.photoview.PhotoView>(R.id.photoImageView)
-        CommonUtil.loadBase64Image(base64String,photoImageView)
+
     }
 }

@@ -6,7 +6,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -36,6 +38,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.feedbackapp.R
 import com.example.feedbackapp.adapter.QuestionTypeAdapter
 import com.example.feedbackapp.adapter.SimpleGridSpacingItemDecoration
+import com.example.feedbackapp.bean.AlbumBean
 import com.example.feedbackapp.bean.FeedbackRequest
 import com.example.feedbackapp.bean.TypeBean
 import com.example.feedbackapp.common.DEVICE_ID
@@ -53,6 +56,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 class MainActivity : AppCompatActivity() {
     private var currentPhotoPath: String? = null
@@ -92,6 +96,11 @@ class MainActivity : AppCompatActivity() {
     private val deleteImageIV3 by lazy { findViewById<ImageView>(R.id.delete_image_3) }
     private val deleteImageIV4 by lazy { findViewById<ImageView>(R.id.delete_image_4) }
 
+    private val isVideoImageIV1 by lazy { findViewById<ImageView>(R.id.is_video_iv1) }
+    private val isVideoImageIV2 by lazy { findViewById<ImageView>(R.id.is_video_iv2) }
+    private val isVideoImageIV3 by lazy { findViewById<ImageView>(R.id.is_video_iv3) }
+    private val isVideoImageIV4 by lazy { findViewById<ImageView>(R.id.is_video_iv4) }
+
     private val imageViews by lazy { listOf(addImageIV1, addImageIV2, addImageIV3, addImageIV4) }
     private val deleteImageViews by lazy {
         listOf(
@@ -102,13 +111,23 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private val isVideoImageViews by lazy {
+        listOf(
+            isVideoImageIV1,
+            isVideoImageIV2,
+            isVideoImageIV3,
+            isVideoImageIV4
+        )
+    }
+
     private val questionTypeRV by lazy { findViewById<RecyclerView>(R.id.question_type_rv) }
 
     private val mainViewModel: MainViewModel by viewModels()
     private val questionTypeAdapter by lazy { QuestionTypeAdapter(mainViewModel) }
 
-    private val imageUriList = mutableListOf<Uri?>()
+    private val albumUriList = mutableListOf<AlbumBean>()
     private val imageUrlList = mutableListOf<String>()
+    private val videoUrlList = mutableListOf<String>()
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -255,7 +274,7 @@ class MainActivity : AppCompatActivity() {
             onBackPressed()
         }
         submitTV.setOnClickListener {
-            Log.w("gyk", "setupListeners: ", )
+            Log.w("gyk", "setupListeners: ")
             lifecycleScope.launch {
                 NetworkInstance.submitFeedback(FeedbackRequest(
                     targetId = 0,
@@ -290,30 +309,44 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, REQUEST_PICK_IMAGE)
     }
 
+    private fun openVideoPicker(){
+        choiceVideo(REQUEST_PICK_VIDEO)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if ((requestCode == REQUEST_PICK_IMAGE) && resultCode == RESULT_OK) {
             data?.data?.let { selectedImageUri ->
-                if (imageUriList.size < 4) {
-                    imageUriList.add(selectedImageUri)
+                if (albumUriList.size < 4) {
+                    albumUriList.add(AlbumBean(selectedImageUri))
                     updateImageViews()
                 }
             }
         }
         if ((requestCode == REQUEST_IMAGE_CAPTURE) && resultCode == RESULT_OK){
-            if (imageUriList.size < 4) {
+            if (albumUriList.size < 4) {
                 val file = currentPhotoPath?.let { File(it) }
                 val uri = Uri.fromFile(file)
-                imageUriList.add(uri)
+                albumUriList.add(AlbumBean(uri))
                 updateImageViews()
+            }
+        }
+        if ((requestCode == REQUEST_PICK_VIDEO) && resultCode == RESULT_OK){
+            data?.data?.let { selectedVideoUri ->
+                if (albumUriList.size < 4) {
+                    val albumBean = AlbumBean(selectedVideoUri)
+                    albumBean.isVideo = true
+                    albumUriList.add(albumBean)
+                    updateImageViews()
+                }
             }
         }
         dismissAlertDialog()
     }
 
     private fun deleteImage(index: Int) {
-        if (index in imageUriList.indices) {
-            imageUriList.removeAt(index)
+        if (index in albumUriList.indices) {
+            albumUriList.removeAt(index)
             updateImageViews()
         }
     }
@@ -321,24 +354,73 @@ class MainActivity : AppCompatActivity() {
     private fun updateImageViews() {
         imageUrlList.clear()
         imageViews?.forEachIndexed { index, imageView ->
-            if (index < imageUriList.size) {
-                val imageUri = imageUriList[index]
-                val base64String = imageUri?.let { CommonUtil.uriToBase64(it, this,windowManager.defaultDisplay.width,windowManager.defaultDisplay.height) }
-                if (base64String != null) {
-                    imageUrlList.add(base64String)
-                    CommonUtil.loadBase64Image(base64String, imageView!!)
+            if (index < albumUriList.size) {
+                val albumUri = albumUriList[index]
+//                val base64String = imageUri.let { CommonUtil.uriToBase64(it.uri, this,windowManager.defaultDisplay.width,windowManager.defaultDisplay.height) }
+//                if (base64String != null) {
+//                    imageUrlList.add(base64String)
+//                    CommonUtil.loadBase64Image(base64String, imageView!!)
+//                }
+                deleteImageViews[index]?.visibility = View.VISIBLE
+                //1.如果是视频,则要显示播放按钮
+                if (albumUri.isVideo) {
+                    isVideoImageViews[index]?.visibility = View.VISIBLE
+                    getRealPathFromURI(albumUri.uri)?.let { path ->
+                        val thumbnail = ThumbnailUtils.createVideoThumbnail(
+                            path,
+                            MediaStore.Images.Thumbnails.MINI_KIND
+                        )
+                        imageView.setImageBitmap(thumbnail)
+                        //覆盖点击事件
+                        imageView.setOnClickListener {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.setDataAndType(albumUri.uri, "video/*")
+                            startActivity(intent)
+                        }
+                    }
+                } else {
+                    // 使用ContentResolver通过URI获取输入流
+                    val inputStream = contentResolver.openInputStream(albumUri.uri)
+
+                    // 将输入流解析为Bitmap
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+
+                    // 关闭输入流
+                    inputStream!!.close()
+                    // 显示Bitmap到ImageView
+                    imageView.setImageBitmap(bitmap)
+                    imageView.setOnClickListener {
+                        val intent = Intent(this@MainActivity,WatchPicActivity::class.java)
+                        intent.putExtra("photoUrl",albumUri.uri.toString())
+                        startActivity(intent)
+                    }
+
                 }
-                deleteImageViews!![index]?.visibility = View.VISIBLE
             } else {
                 imageView?.setImageURI(null)
-                imageView?.isClickable = index == imageUriList.size
-                imageView?.isVisible = index == imageUriList.size
-                deleteImageViews!![index]?.visibility = View.GONE
+                imageView?.isClickable = index == albumUriList.size
+                imageView?.isVisible = index == albumUriList.size
+                deleteImageViews[index]?.visibility = View.GONE
+                isVideoImageViews[index]?.visibility = View.GONE
                 imageView?.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.add_image))
             }
         }
-        showImageNumTV?.text = "已添加${imageUriList.size}/4张图片"
+        showImageNumTV.text = "已添加${albumUriList.size}/4张图片"
         }
+
+    // 获取视频文件的实际路径
+    private fun getRealPathFromURI(contentUri: Uri): String? {
+        val proj = arrayOf(MediaStore.Video.Media.DATA)
+        val cursor = contentResolver.query(contentUri, proj, null, null, null)
+        if (cursor != null) {
+            cursor.moveToFirst()
+            val column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+            val path = cursor.getString(column_index)
+            cursor.close()
+            return path
+        }
+        return null
+    }
 
     fun showCustomDialog(context: Context) {
         // 创建布局填充器
@@ -349,6 +431,7 @@ class MainActivity : AppCompatActivity() {
         val takePhotoTV: TextView = dialogView.findViewById(R.id.take_photo_tv)
         val chooseAlbumTV: TextView = dialogView.findViewById(R.id.choose_album_tv)
         val cancelTV: TextView = dialogView.findViewById(R.id.cancel_tv)
+        val chooseVideoTV:TextView = dialogView.findViewById(R.id.choose_video_tv)
 
         // 设置控件的值
 
@@ -378,6 +461,10 @@ class MainActivity : AppCompatActivity() {
         chooseAlbumTV.setOnClickListener {
             // 处理选择图片逻辑
             openImagePicker()
+        }
+
+        chooseVideoTV.setOnClickListener {
+            openVideoPicker()
         }
 
         cancelTV.setOnClickListener {
@@ -457,9 +544,16 @@ class MainActivity : AppCompatActivity() {
         alertDialog?.dismiss()
     }
 
+    private fun choiceVideo(openVideoCode:Int) {
+        val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, openVideoCode);
+    }
+
+
 
     companion object {
         private const val REQUEST_PICK_IMAGE = 1
+        private const val REQUEST_PICK_VIDEO = 7
         private const val REQUEST_IMAGE_CAPTURE = 2
         // 权限请求码
         private const val CAMERA_REQUEST_CODE = 100

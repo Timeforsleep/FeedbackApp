@@ -15,7 +15,7 @@ data class FeedbackHistoryBean(
     var content: String,
     var relation: String?,
     var schedule:Int?,
-    var photos: String?,
+//    var photos: String?,
     var video: String?,
     @SerializedName("createdStime")
     var createdTime: String,

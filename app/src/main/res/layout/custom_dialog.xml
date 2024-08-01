@@ -7,6 +7,18 @@
 
 
     <TextView
+        android:id="@+id/choose_video_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="从相册选择视频"
+        app:layout_constraintBottom_toTopOf="@+id/take_photo_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
         android:id="@+id/take_photo_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -23,7 +35,7 @@
         android:layout_width="0dp"
         android:gravity="center"
         android:padding = "12dp"
-        android:text="从相册选择"
+        android:text="从相册选择图片"
         app:layout_constraintBottom_toTopOf="@+id/view2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

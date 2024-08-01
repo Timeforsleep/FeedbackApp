@@ -205,6 +205,8 @@
         app:layout_constraintTop_toBottomOf="@+id/guide_et">
 
 
+
+
         <ImageView
             android:id="@+id/add_image_iv1"
             android:layout_width="match_parent"
@@ -218,6 +220,15 @@
             android:layout_gravity="top|right"
             android:visibility="gone"
             app:srcCompat="@drawable/delete_icon" />
+
+        <ImageView
+            android:id="@+id/is_video_iv1"
+            android:visibility="gone"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            app:srcCompat="@drawable/play_video_icon" />
+
     </FrameLayout>
 
     <FrameLayout
@@ -245,6 +256,14 @@
             android:layout_gravity="top|right"
             android:visibility="gone"
             app:srcCompat="@drawable/delete_icon" />
+
+        <ImageView
+            android:id="@+id/is_video_iv2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            app:srcCompat="@drawable/play_video_icon" />
 
     </FrameLayout>
 
@@ -274,6 +293,14 @@
             android:layout_gravity="top|right"
             android:visibility="gone"
             app:srcCompat="@drawable/delete_icon" />
+
+        <ImageView
+            android:id="@+id/is_video_iv3"
+            android:layout_width="30dp"
+            android:visibility="gone"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            app:srcCompat="@drawable/play_video_icon" />
     </FrameLayout>
 
     <FrameLayout
@@ -301,6 +328,14 @@
             android:layout_gravity="top|right"
             android:visibility="gone"
             app:srcCompat="@drawable/delete_icon" />
+
+        <ImageView
+            android:id="@+id/is_video_iv4"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            app:srcCompat="@drawable/play_video_icon" />
 
 
     </FrameLayout>
