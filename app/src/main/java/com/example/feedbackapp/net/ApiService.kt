@@ -12,13 +12,13 @@ import retrofit2.http.Query
 
 
 interface ApiService {
-    @GET("category/list")
+    @GET("advice/category/list")
     suspend fun getProblemScene(): ApiResponse<Map<String, String>>
 
     @POST("add")
     suspend fun addFeedback(@Body feedback: FeedbackRequest): ApiResponse<Int>
 
-    @GET("list")
+    @GET("advice/list")
     suspend fun getFeedbackHistory(@Query("userId") userId: Int): ApiResponse<List<FeedbackHistoryBean>>
 
     @Multipart
@@ -26,7 +26,7 @@ interface ApiService {
     suspend fun uploadFile(@Part file: MultipartBody.Part): ApiResponse<Int>
 
     @Multipart
-    @POST("upload")
+    @POST("files/upload")
     suspend fun uploadFiles(@Part files: List<MultipartBody.Part>): ApiResponse<Int>
 }
 

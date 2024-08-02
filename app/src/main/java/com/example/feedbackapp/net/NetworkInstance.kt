@@ -93,7 +93,7 @@ object NetworkInstance {
         val parts = filePaths.map { filePath ->
             val file = File(filePath)
             val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
-            MultipartBody.Part.createFormData("files", file.name, requestFile)
+            MultipartBody.Part.createFormData("file", file.name, requestFile)
         }
         val response = apiService.uploadFiles(parts)
         emit(response)
@@ -104,7 +104,7 @@ object NetworkInstance {
         }
         .catch { e ->
             // 处理异常，例如记录日志或发出错误通知
-            Log.e("NetworkInstance", "Error occurred: ${e.message}")
+            Log.e("uploadFiles", "Error occurred: ${e.message}")
             // 可以通过emit发送错误结果，视需求而定
         }
 

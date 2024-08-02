@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.ThumbnailUtils
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -24,6 +25,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -58,6 +60,10 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -671,10 +677,13 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, openImageCode)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun uploadMedia(filePaths:List<String> ) {
+        Log.w("gykStartTime", "uploadMedia: ${convert(System.currentTimeMillis())}")
         lifecycleScope.launch {
-            NetworkInstance.uploadFiles(filePaths).flowOn(Dispatchers.IO).collectLatest {
+            NetworkInstance.uploadFiles(filePaths).flowOn(Dispatchers.IO).collect {
                     response ->
+                Log.w("gykEndTime", "uploadMedia: ${convert(System.currentTimeMillis())}")
                     // 处理响应
                     if (response.returnCode == 0) {
                         Log.d("Upload", "File uploaded successfully")
@@ -683,6 +692,22 @@ class MainActivity : AppCompatActivity() {
                     }
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun convert(timestamp:Long): String {
+
+        // 将时间戳转换为Instant对象
+        val instant = Instant.ofEpochMilli(timestamp)
+
+        // 使用系统默认时区将Instant对象转换为LocalDateTime对象
+        val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+
+        // 定义日期时间格式
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")
+
+        // 格式化LocalDateTime对象为字符串
+        return dateTime.format(formatter)
     }
 
     private fun compressAndUploadMedia(context: Context, inputFilePaths: List<String>, outputFilePaths: List<String>) {
