@@ -10,9 +10,13 @@ android {
     defaultConfig {
         applicationId "com.example.feedbackapp"
         minSdk 25
-        targetSdk 34
+        targetSdk 29
         versionCode 1
         versionName "1.0"
+
+        ndk {
+            abiFilters "armeabi-v7a","arm64-v8a","x86","x86_64"
+        }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -54,4 +58,6 @@ dependencies {
 
     implementation 'me.zhanghai.android.materialratingbar:library:1.4.0'
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+    implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4'
+    implementation 'com.github.microshow:RxFFmpeg:4.9.0-lite'
 }

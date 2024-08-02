@@ -25,6 +25,7 @@ class FeedbackHistoryActivity : AppCompatActivity() {
     var addAlertDialog = AddAlertDialog(this)
 
     // 对话框消失时的回调
+
     fun onDialogDismissed() {
         refreshFeedbackHistory()
     }

@@ -18,6 +18,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -48,8 +49,11 @@ import com.example.feedbackapp.common.EMERGENCY_NORMAL
 import com.example.feedbackapp.common.USER_ID
 import com.example.feedbackapp.net.NetworkInstance
 import com.example.feedbackapp.util.CommonUtil
+import com.example.feedbackapp.util.CommonUtil.getFilePathFromUri
 import com.example.feedbackapp.viewmodel.MainViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
@@ -60,6 +64,8 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private var currentPhotoPath: String? = null
+    private val button: Button by lazy { findViewById(R.id.button) }
+
     //用于提交的bean类
 //    private val feedbackRequest = FeedbackRequest()
 //    private val imageTest by lazy{findViewById<ImageView>(R.id.imageViewTest)}
@@ -68,22 +74,22 @@ class MainActivity : AppCompatActivity() {
     private val fucCL by lazy { findViewById<ConstraintLayout>(R.id.func_type_cl) }
     private val productCL by lazy { findViewById<ConstraintLayout>(R.id.product_type_cl) }
 
-    private val submitTV:TextView by lazy { findViewById(R.id.submit_tv) }
-    private val feedbackHistoryTV:TextView by lazy { findViewById(R.id.feedback_history_tv) }
+    private val submitTV: TextView by lazy { findViewById(R.id.submit_tv) }
+    private val feedbackHistoryTV: TextView by lazy { findViewById(R.id.feedback_history_tv) }
 
-    private val backIV:ImageView by lazy { findViewById(R.id.back_iv) }
+    private val backIV: ImageView by lazy { findViewById(R.id.back_iv) }
 
-    private val showImageNumTV:TextView by lazy { findViewById(R.id.show_image_num_tv) }
+    private val showImageNumTV: TextView by lazy { findViewById(R.id.show_image_num_tv) }
 
-    private val feedbackET:EditText by lazy { findViewById(R.id.guide_et)}
+    private val feedbackET: EditText by lazy { findViewById(R.id.guide_et) }
 
-    private val startTimeET:EditText by lazy { findViewById(R.id.startTime_ed) }
-    private val endTimeET:EditText by lazy { findViewById(R.id.endTime_ed) }
-    private val phoneNumET:EditText by lazy { findViewById(R.id.phoneNum_editText) }
+    private val startTimeET: EditText by lazy { findViewById(R.id.startTime_ed) }
+    private val endTimeET: EditText by lazy { findViewById(R.id.endTime_ed) }
+    private val phoneNumET: EditText by lazy { findViewById(R.id.phoneNum_editText) }
 
-    private val normalEmergencyTV:TextView by lazy { findViewById(R.id.normal_emergency_tv) }
-    private val importantEmergencyTV:TextView by lazy { findViewById(R.id.important_emergency_tv) }
-    private val mostEmergencyTV:TextView by lazy { findViewById(R.id.most_emergency_tv) }
+    private val normalEmergencyTV: TextView by lazy { findViewById(R.id.normal_emergency_tv) }
+    private val importantEmergencyTV: TextView by lazy { findViewById(R.id.important_emergency_tv) }
+    private val mostEmergencyTV: TextView by lazy { findViewById(R.id.most_emergency_tv) }
 
     //TODO点击加载原图
     private val addImageIV1 by lazy { findViewById<ImageView>(R.id.add_image_iv1) }
@@ -120,6 +126,11 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private val PERMISSIONS_STORAGE = arrayOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
+
     private val questionTypeRV by lazy { findViewById<RecyclerView>(R.id.question_type_rv) }
 
     private val mainViewModel: MainViewModel by viewModels()
@@ -133,6 +144,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        ActivityCompat.requestPermissions(
+            this@MainActivity,
+            PERMISSIONS_STORAGE,
+            STORAGE_REQUEST_CODE
+        )
         // 初始化监听
         setupListeners()
         // 初始化 UI
@@ -168,29 +184,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         //lifedata
-        val errorTypeObserver = Observer<Boolean>{isFucError->
-            if (isFucError){
+        val errorTypeObserver = Observer<Boolean> { isFucError ->
+            if (isFucError) {
                 fucCL.setBackgroundColor(Color.parseColor("#EBF4FF"))
                 productCL.setBackgroundColor(Color.parseColor("#f0f0f0"))
-            }else{
+            } else {
                 productCL.setBackgroundColor(Color.parseColor("#EBF4FF"))
                 fucCL.setBackgroundColor(Color.parseColor("#f0f0f0"))
             }
         }
 
-        val emergencyTypeObserver = Observer<Int>{emergencyTypeNum->
+        val emergencyTypeObserver = Observer<Int> { emergencyTypeNum ->
             when (emergencyTypeNum) {
-                EMERGENCY_IMPORTANT ->{
+                EMERGENCY_IMPORTANT -> {
                     importantEmergencyTV.setBackgroundColor(Color.parseColor("#EBF4FF"))
                     normalEmergencyTV.setBackgroundColor(Color.parseColor("#f0f0f0"))
                     mostEmergencyTV.setBackgroundColor(Color.parseColor("#f0f0f0"))
                 }
-                EMERGENCY_NORMAL ->{
+
+                EMERGENCY_NORMAL -> {
                     normalEmergencyTV.setBackgroundColor(Color.parseColor("#EBF4FF"))
                     CommonUtil.setBackGroundGray(mostEmergencyTV)
                     CommonUtil.setBackGroundGray(importantEmergencyTV)
                 }
-                EMERGENCY_MOST ->{
+
+                EMERGENCY_MOST -> {
                     mostEmergencyTV.setBackgroundColor(Color.parseColor("#EBF4FF"))
                     CommonUtil.setBackGroundGray(importantEmergencyTV)
                     CommonUtil.setBackGroundGray(normalEmergencyTV)
@@ -198,23 +216,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val contentObserver = Observer<String>{newContent->
-            if (newContent.isNotEmpty()){
+        val contentObserver = Observer<String> { newContent ->
+            if (newContent.isNotEmpty()) {
                 submitTV.isClickable = true
                 submitTV.setBackgroundColor(Color.parseColor("#0056f1"))
                 submitTV.setTextColor(Color.parseColor("#FFFFFF"))
-            }else{
+            } else {
                 submitTV.isClickable = false
                 submitTV.setBackgroundColor(Color.parseColor("#bec3ce"))
                 submitTV.setTextColor(Color.parseColor("#dee0e6"))
             }
         }
 
-        val problemSceneObserver = Observer<TypeBean>{newTypeBean->
+        val problemSceneObserver = Observer<TypeBean> { newTypeBean ->
             questionTypeAdapter.updateSelectedTypeBean(newTypeBean)
         }
 
-        val relationNumberObserver = Observer<String>{newRelationNumber->
+        val relationNumberObserver = Observer<String> { newRelationNumber ->
             if (newRelationNumber.isNotEmpty()) {
                 startTimeET.visibility = View.VISIBLE
                 endTimeET.visibility = View.VISIBLE
@@ -225,14 +243,17 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        mainViewModel.isFucError.observe(this,errorTypeObserver)
+        mainViewModel.isFucError.observe(this, errorTypeObserver)
         mainViewModel.questionType.observe(this, emergencyTypeObserver)
-        mainViewModel.feedbackContent.observe(this,contentObserver)
-        mainViewModel.questionSelectedScene.observe(this,problemSceneObserver)
-        mainViewModel.relationNumber.observe(this,relationNumberObserver)
+        mainViewModel.feedbackContent.observe(this, contentObserver)
+        mainViewModel.questionSelectedScene.observe(this, problemSceneObserver)
+        mainViewModel.relationNumber.observe(this, relationNumberObserver)
     }
 
     private fun setupListeners() {
+        button.setOnClickListener {
+            handleMedia(albumUriList)
+        }
         fucCL.setOnClickListener {
             mainViewModel.isFucError.value = true
         }
@@ -240,7 +261,7 @@ class MainActivity : AppCompatActivity() {
             mainViewModel.isFucError.value = false
         }
         imageViews.forEachIndexed { index, imageView ->
-            imageView.setOnClickListener { showCustomDialog(this)}
+            imageView.setOnClickListener { showCustomDialog(this) }
         }
 
         deleteImageViews.forEachIndexed { index, deleteView ->
@@ -276,41 +297,78 @@ class MainActivity : AppCompatActivity() {
         submitTV.setOnClickListener {
             Log.w("gyk", "setupListeners: ")
             lifecycleScope.launch {
-                NetworkInstance.submitFeedback(FeedbackRequest(
-                    targetId = 0,
-                    targetType = 0,
-                    userId = USER_ID,
-                    deviceId = DEVICE_ID,
-                    status = mainViewModel.questionType.value!!,
-                    category = if (mainViewModel.isFucError.value!!) 0 else 1,
-                    tagId = mainViewModel.questionSelectedScene.value!!.id.toInt(),
-                    tagName = mainViewModel.questionSelectedScene.value!!.typeName,
-                    content = mainViewModel.feedbackContent.value!!,
-                    relation = mainViewModel.relationNumber.value,
-                    photos = imageUrlList,
-                    video = null,
-                    startTime = mainViewModel.startTime.value!!.toIntOrNull(),
-                    endTime = mainViewModel.endTime.value!!.toIntOrNull()
-                )).collectLatest {
+                NetworkInstance.submitFeedback(
+                    FeedbackRequest(
+                        targetId = 0,
+                        targetType = 0,
+                        userId = USER_ID,
+                        deviceId = DEVICE_ID,
+                        status = mainViewModel.questionType.value!!,
+                        category = if (mainViewModel.isFucError.value!!) 0 else 1,
+                        tagId = mainViewModel.questionSelectedScene.value!!.id.toInt(),
+                        tagName = mainViewModel.questionSelectedScene.value!!.typeName,
+                        content = mainViewModel.feedbackContent.value!!,
+                        relation = mainViewModel.relationNumber.value,
+                        photos = imageUrlList,
+                        video = null,
+                        startTime = mainViewModel.startTime.value!!.toIntOrNull(),
+                        endTime = mainViewModel.endTime.value!!.toIntOrNull()
+                    )
+                ).collectLatest {
                     if (it.returnCode == 0) {
                         // 将 Map 转换为 List<TypeBean>
-                        Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT)
+                            .show()
                     } else {
                         // 处理 API 错误，例如记录日志
-                        Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
             }
         }
     }
 
+
+
     private fun openImagePicker() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(intent, REQUEST_PICK_IMAGE)
+        when {
+            ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                // 权限已经被授予，启动选择媒体的 Intent
+//                val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+//                startActivityForResult(intent, REQUEST_PICK_IMAGE)
+                Log.w("gyk", "openImagePicker: 打开图片")
+                chooseImage(REQUEST_PICK_IMAGE)
+            }
+            else -> {
+                Log.w("gyk", "opeFnImagePicker: 请求图片")
+//                alertDialog?.dismiss()
+                // 请求权限
+                ActivityCompat.requestPermissions(
+                    this@MainActivity,
+                    PERMISSIONS_STORAGE,
+                    STORAGE_REQUEST_CODE
+                )
+            }
+        }
     }
 
-    private fun openVideoPicker(){
-        choiceVideo(REQUEST_PICK_VIDEO)
+    private fun openVideoPicker() {
+        when {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                // 权限已经被授予，启动选择媒体的 Intent
+                choiceVideo(REQUEST_PICK_VIDEO)
+            }
+            else -> {
+                // 请求权限
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    STORAGE_REQUEST_CODE
+                )
+            }
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -323,7 +381,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        if ((requestCode == REQUEST_IMAGE_CAPTURE) && resultCode == RESULT_OK){
+        if ((requestCode == REQUEST_IMAGE_CAPTURE) && resultCode == RESULT_OK) {
             if (albumUriList.size < 4) {
                 val file = currentPhotoPath?.let { File(it) }
                 val uri = Uri.fromFile(file)
@@ -331,7 +389,7 @@ class MainActivity : AppCompatActivity() {
                 updateImageViews()
             }
         }
-        if ((requestCode == REQUEST_PICK_VIDEO) && resultCode == RESULT_OK){
+        if ((requestCode == REQUEST_PICK_VIDEO) && resultCode == RESULT_OK) {
             data?.data?.let { selectedVideoUri ->
                 if (albumUriList.size < 4) {
                     val albumBean = AlbumBean(selectedVideoUri)
@@ -364,6 +422,7 @@ class MainActivity : AppCompatActivity() {
                 deleteImageViews[index]?.visibility = View.VISIBLE
                 //1.如果是视频,则要显示播放按钮
                 if (albumUri.isVideo) {
+//                    uploadImage(albumUri.uri,contentResolver)
                     isVideoImageViews[index]?.visibility = View.VISIBLE
                     getRealPathFromURI(albumUri.uri)?.let { path ->
                         val thumbnail = ThumbnailUtils.createVideoThumbnail(
@@ -381,6 +440,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     // 使用ContentResolver通过URI获取输入流
                     val inputStream = contentResolver.openInputStream(albumUri.uri)
+//                    uploadImage(albumUri.uri,contentResolver)
 
                     // 将输入流解析为Bitmap
                     val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -390,8 +450,8 @@ class MainActivity : AppCompatActivity() {
                     // 显示Bitmap到ImageView
                     imageView.setImageBitmap(bitmap)
                     imageView.setOnClickListener {
-                        val intent = Intent(this@MainActivity,WatchPicActivity::class.java)
-                        intent.putExtra("photoUrl",albumUri.uri.toString())
+                        val intent = Intent(this@MainActivity, WatchPicActivity::class.java)
+                        intent.putExtra("photoUrl", albumUri.uri.toString())
                         startActivity(intent)
                     }
 
@@ -406,7 +466,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         showImageNumTV.text = "已添加${albumUriList.size}/4张图片"
-        }
+
+    }
 
     // 获取视频文件的实际路径
     private fun getRealPathFromURI(contentUri: Uri): String? {
@@ -431,7 +492,7 @@ class MainActivity : AppCompatActivity() {
         val takePhotoTV: TextView = dialogView.findViewById(R.id.take_photo_tv)
         val chooseAlbumTV: TextView = dialogView.findViewById(R.id.choose_album_tv)
         val cancelTV: TextView = dialogView.findViewById(R.id.cancel_tv)
-        val chooseVideoTV:TextView = dialogView.findViewById(R.id.choose_video_tv)
+        val chooseVideoTV: TextView = dialogView.findViewById(R.id.choose_video_tv)
 
         // 设置控件的值
 
@@ -464,7 +525,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         chooseVideoTV.setOnClickListener {
-            openVideoPicker()
+            choiceVideo(REQUEST_PICK_VIDEO)
         }
 
         cancelTV.setOnClickListener {
@@ -477,19 +538,31 @@ class MainActivity : AppCompatActivity() {
             setGravity(Gravity.BOTTOM)
 
             // 设置对话框的宽度
-            setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)
+            setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT
+            )
         }
         // 显示对话框
         alertDialog?.show()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             dispatchTakePictureIntent()
         } else {
             // 相机权限被拒绝
         }
+//        if (requestCode == STORAGE_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//
+//        } else {
+//
+//        }
     }
 
     // 请求相机权限
@@ -497,11 +570,17 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_IMAGE_CAPTURE)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA),
+                REQUEST_IMAGE_CAPTURE
+            )
         } else {
             dispatchTakePictureIntent()
         }
     }
+
+    //请求读取内部存储权限
 
     // 拍照并存储照片路径
     private fun dispatchTakePictureIntent() {
@@ -539,25 +618,190 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Throws(IOException::class)
+    private fun createOutputFile(context:Context,fileName: String, isVideo: Boolean): File {
+        // 获取应用的外部文件目录
+//        val storageDir: File = context.cacheDir
+        // 如果目录不存在，则创建它
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        // 根据是否是视频来设置文件后缀
+        val fileExtension = if (isVideo) ".mp4" else ".jpg"
 
-    private fun dismissAlertDialog(){
+        // 创建临时文件
+        return File.createTempFile(
+            fileName, // 前缀
+            fileExtension, // 后缀
+            storageDir // 目录
+        ).apply {
+            // 设置文件路径
+            Log.w("FileCreation", "Created file at: ${absolutePath}")
+        }
+    }
+
+    private fun createOutputFile(filePath: String): File {
+        val file = File(filePath)
+        // 如果文件目录不存在，则创建它
+        file.parentFile?.let {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
+        return file.apply {
+            // 设置文件路径
+            Log.w("gykFileCreation", "Created file at: ${absolutePath}")
+        }
+    }
+
+
+    private fun dismissAlertDialog() {
         alertDialog?.dismiss()
     }
 
-    private fun choiceVideo(openVideoCode:Int) {
-        val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+    private fun choiceVideo(openVideoCode: Int) {
+        val intent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        );
         startActivityForResult(intent, openVideoCode);
     }
 
+    private fun chooseImage(openImageCode: Int) {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(intent, openImageCode)
+    }
 
+    fun uploadMedia(filePaths:List<String> ) {
+        lifecycleScope.launch {
+            NetworkInstance.uploadFiles(filePaths).flowOn(Dispatchers.IO).collectLatest {
+                    response ->
+                    // 处理响应
+                    if (response.returnCode == 0) {
+                        Log.d("Upload", "File uploaded successfully")
+                    } else {
+                        Log.e("Upload", "Failed to upload file: ${response.message}")
+                    }
+            }
+        }
+    }
+
+    private fun compressAndUploadMedia(context: Context, inputFilePaths: List<String>, outputFilePaths: List<String>) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            inputFilePaths.zip(outputFilePaths).forEachIndexed { index, (inputFilePath, outputFilePath) ->
+                val inputFile = File(inputFilePath)
+                if (!inputFile.exists()) {
+                    Log.e("gyk", "Input file does not exist: $inputFilePath")
+                    return@forEachIndexed
+                }
+                val outputFile = File(outputFilePath)
+                if (!outputFile.exists()) {
+                    Log.e("gyk", "Output file does not exist: $outputFilePath")
+                    return@forEachIndexed
+                }
+
+                try {
+                    val success = CommonUtil.compressMedia(context, inputFilePath, outputFilePath)
+                    if (success) {
+                        Log.w("gyk", "compressAndUploadMedia: 压缩成功")
+                        if (index == inputFilePaths.size - 1) {
+                            // Upload only after all files are processed
+                            uploadMedia(outputFilePaths)
+                        }
+                    } else {
+                        Log.w("gyk", "compressAndUploadMedia: 压缩失败")
+                    }
+                } catch (e: Exception) {
+                    Log.e("gyk", "compressAndUploadMedia: Error during compression", e)
+                }
+            }
+        }
+    }
+
+
+
+//    fun uploadImage() {
+//        lifecycleScope.launch {
+//            NetworkInstance.uploadFile(uri, contentResolver).flowOn(Dispatchers.IO)
+//                .collect { response ->
+//                    // 处理响应
+//                    if (response.returnCode == 0) {
+//                        Log.d("Upload", "File uploaded successfully")
+//                    } else {
+//                        Log.e("Upload", "Failed to upload file: ${response.message}")
+//                    }
+//                }
+//        }
+//    }
+//
+//    fun uploadVideos() {
+//        lifecycleScope.launch {
+//            NetworkInstance.uploadFiles(albumUriList.map { it.uri }, contentResolver)
+//                .flowOn(Dispatchers.IO)
+//                .collectLatest {
+//                        response->
+//                    if (response.returnCode==0) {
+//                        Log.d("Upload", "File uploaded successfully")
+//                    } else {
+//                        Log.e("Upload", "Failed to upload file: ${response.message}")
+//                    }
+//                }
+//        }
+//    }
+
+//    private val selectVideoLauncher =
+//        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+//            uri?.let {
+//                // 选中视频后进行压缩和上传
+//                val inputFilePath = getFilePathFromUri(uri)
+//                val outputFilePath =
+//                    getExternalFilesDir(null)?.absolutePath + "/compressed_video.mp4"
+//                compressAndUploadVideo(inputFilePath, outputFilePath)
+//            }
+//        }
+
+    fun handleMedia(list: MutableList<AlbumBean>) {
+        val inputFilePaths =
+            list.map { albumBean -> getFilePathFromUri(albumBean.uri, contentResolver) }
+        Log.w("gyk", "handleMedia:${inputFilePaths} ")
+        val outputFilePaths = inputFilePaths.map { inputFilePath ->
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                 getExternalFilesDir(null)?.absolutePath + "/compressed_${timestamp}" + File(inputFilePath).name
+//            CommonUtil.removeFileExtension(outputpath)
+        }
+        outputFilePaths.forEach {
+                outputPath ->
+            val outputFile = File(outputPath)
+            if (!outputFile.exists()) {
+                outputFile.createNewFile()
+            }
+        }
+//        (outputFilePaths)
+//        for (i in 0 until albumUriList.size) {
+////            createOutputFile(context = this,outputFilePaths[i],albumUriList[i].isVideo)
+//        }
+        Log.w("gyk", "outputMedia:${outputFilePaths} ")
+        compressAndUploadMedia(this,inputFilePaths, outputFilePaths)
+    }
+
+//    private fun compressAndUploadVideo(inputFilePath: String, outputFilePath: String) {
+//        CommonUtil.compressVideo(this, inputFilePath, outputFilePath,
+//            onSuccess = {
+//                // 压缩成功后进行上传
+//                uploadVideo(outputFilePath)
+//            },
+//            onFailure = { error ->
+//                // 处理压缩失败
+//            })
+//    }
 
     companion object {
         private const val REQUEST_PICK_IMAGE = 1
         private const val REQUEST_PICK_VIDEO = 7
         private const val REQUEST_IMAGE_CAPTURE = 2
+
         // 权限请求码
         private const val CAMERA_REQUEST_CODE = 100
-        private const val STORAGE_REQUEST_CODE = 101
+        private const val STORAGE_REQUEST_CODE = 1001
 
     }
 
