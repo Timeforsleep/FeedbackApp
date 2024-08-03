@@ -239,27 +239,27 @@ object CommonUtil {
 //        }
 //    }
 
-    fun compressVideo(context: Context, inputFilePath: String, outputFilePath: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        val command = arrayOf("-i", inputFilePath, "-vf", "boxblur=5:1", "-preset", "superfast",outputFilePath)
-
-        RxFFmpegInvoke.getInstance().runCommandRxJava(command).subscribe(object : RxFFmpegSubscriber() {
-            override fun onFinish() {
-                onSuccess()
-            }
-
-            override fun onProgress(progress: Int, progressTime: Long) {
-                // 更新进度
-            }
-
-            override fun onCancel() {
-                onFailure("Compression canceled")
-            }
-
-            override fun onError(message: String) {
-                onFailure(message)
-            }
-        })
-    }
+//    fun compressVideo(context: Context, inputFilePath: String, outputFilePath: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+//        val command = arrayOf("-i", inputFilePath, "-vf", "boxblur=5:1", "-preset", "superfast",outputFilePath)
+//
+//        RxFFmpegInvoke.getInstance().runCommandRxJava(command).subscribe(object : RxFFmpegSubscriber() {
+//            override fun onFinish() {
+//                onSuccess()
+//            }
+//
+//            override fun onProgress(progress: Int, progressTime: Long) {
+//                // 更新进度
+//            }
+//
+//            override fun onCancel() {
+//                onFailure("Compression canceled")
+//            }
+//
+//            override fun onError(message: String) {
+//                onFailure(message)
+//            }
+//        })
+//    }
 
     suspend fun compressMedia(context: Context, inputFilePath: String, outputFilePath: String): Boolean = suspendCancellableCoroutine { continuation ->
         val command = arrayOf("ffmpeg", "-y", "-i", inputFilePath, "-vcodec", "libx264", "-crf", "28", outputFilePath)
@@ -303,6 +303,10 @@ object CommonUtil {
         } else {
             filePath // 如果没有找到点（即没有后缀），则返回原始字符串
         }
+    }
+
+    fun isMp4File(filePath: String): Boolean {
+        return filePath.endsWith(".mp4", ignoreCase = true)
     }
 
 }

@@ -22,7 +22,8 @@ data class FeedbackHistoryBean(
     @SerializedName("modifiedStime")
     var modifiedTime: String,
     var isDel: Int,
-    var photoList: List<String>?,
+    @SerializedName("localFile")
+    var localFile: List<String>?,
     var children: List<FeedbackHistoryBean>?
 ) {
 }

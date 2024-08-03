@@ -15,18 +15,22 @@ interface ApiService {
     @GET("advice/category/list")
     suspend fun getProblemScene(): ApiResponse<Map<String, String>>
 
-    @POST("add")
-    suspend fun addFeedback(@Body feedback: FeedbackRequest): ApiResponse<Int>
+    @GET("advice/getid")
+    suspend fun getFeedbackId():ApiResponse<Int>
+
+    @POST("advice/add")
+    suspend fun addFeedback(
+        @Body feedback: FeedbackRequest): ApiResponse<Int>
 
     @GET("advice/list")
     suspend fun getFeedbackHistory(@Query("userId") userId: Int): ApiResponse<List<FeedbackHistoryBean>>
 
-    @Multipart
-    @POST("upload")
-    suspend fun uploadFile(@Part file: MultipartBody.Part): ApiResponse<Int>
-
+//    @Multipart
+//    @POST("upload")
+//    suspend fun uploadFile(@Part file: MultipartBody.Part): ApiResponse<Int>
+//
     @Multipart
     @POST("files/upload")
-    suspend fun uploadFiles(@Part files: List<MultipartBody.Part>): ApiResponse<Int>
+    suspend fun uploadFiles(@Part("id") id: Int,@Part files: List<MultipartBody.Part>): ApiResponse<Int>
 }
 

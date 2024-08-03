@@ -3,6 +3,7 @@ package com.example.feedbackapp
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.tencent.mmkv.MMKV
 import com.tencent.msdk.dns.DnsConfig
 import com.tencent.msdk.dns.MSDKDnsResolver
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +33,7 @@ class App : Application() {
         instance = this
         // 在后台线程初始化 HttpDNS
         applicationScope.launch(Dispatchers.IO) {
+            MMKV.initialize(instance.applicationContext)
             val dnsConfig = DnsConfig.Builder()
                 .dnsId("45672")
                 .dnsKey("bGZq9hw9")

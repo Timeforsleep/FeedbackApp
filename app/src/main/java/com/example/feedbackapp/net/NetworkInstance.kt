@@ -41,7 +41,23 @@ object NetworkInstance {
         Log.e("mini", "Error occurred: ${e.message}" )
     }
 
+    fun getFeedbackId(): Flow<ApiResponse<Int>> = flow {
+        val response = apiService.getFeedbackId()
+        emit(response)
+    }.flowOn(Dispatchers.IO).catch { e ->
+            // 处理异常，例如记录日志或发出错误通知
+            Log.e("mini", "Error occurred: ${e.message}")
+        }
+
+
+
+
     fun submitFeedback(feedbackRequest: FeedbackRequest): Flow<ApiResponse<Int>> = flow {
+//        var photoAndVideoParts:List<MultipartBody.Part>? = null
+//        feedbackRequest.photoFiles?.let {
+//            photoAndVideoParts = NetUtil.createMultipartBodyParts(it)
+//        }
+//        val photoAndVideoParts = NetUtil.createMultipartBodyParts(feedbackRequest.photoFiles)
         val response = apiService.addFeedback(feedbackRequest)
         Log.w("FeedbackViewModel", "submitFeedback: $response")
         emit(response)
@@ -72,30 +88,30 @@ object NetworkInstance {
         }
 
 
-    fun uploadFile(filePath:String): Flow<ApiResponse<Int>> = flow {
-        val file = File(filePath)
-        val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
-        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-        val response = apiService.uploadFile(body)
-        emit(response)
-    }.flowOn(Dispatchers.IO)
-    .retry(retries = 1) { e ->
-        // 仅在特定条件下重试，例如网络问题
-        e is IOException
-    }
-    .catch { e ->
-        // 处理异常，例如记录日志或发出错误通知
-        Log.e("NetworkInstance", "Error occurred: ${e.message}")
-        // 可以通过emit发送错误结果，视需求而定
-    }
+//    fun uploadFile(filePath:String): Flow<ApiResponse<Int>> = flow {
+//        val file = File(filePath)
+//        val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
+//        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+//        val response = apiService.uploadFile(body)
+//        emit(response)
+//    }.flowOn(Dispatchers.IO)
+//    .retry(retries = 1) { e ->
+//        // 仅在特定条件下重试，例如网络问题
+//        e is IOException
+//    }
+//    .catch { e ->
+//        // 处理异常，例如记录日志或发出错误通知
+//        Log.e("NetworkInstance", "Error occurred: ${e.message}")
+//        // 可以通过emit发送错误结果，视需求而定
+//    }
 
-    fun uploadFiles(filePaths: List<String>): Flow<ApiResponse<Int>> = flow {
+    fun uploadFiles(id:Int,filePaths: List<String>): Flow<ApiResponse<Int>> = flow {
         val parts = filePaths.map { filePath ->
             val file = File(filePath)
             val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
             MultipartBody.Part.createFormData("file", file.name, requestFile)
         }
-        val response = apiService.uploadFiles(parts)
+        val response = apiService.uploadFiles(id,parts)
         emit(response)
     }.flowOn(Dispatchers.IO)
         .retry(retries = 1) { e ->

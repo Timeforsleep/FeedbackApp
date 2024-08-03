@@ -49,8 +49,8 @@ class FeedbackChildAdapter(private val context: Context) :
         holder.contentTV.text = data.content
         val photoAdapter = PhotoAdapter(context)
         holder.photoRecyclerView.adapter = photoAdapter
-        if (data.photoList != null) {
-            photoAdapter.updatePhotosList(data.photoList!!)
+        if (data.localFile != null) {
+            photoAdapter.updatePhotosList(data.localFile!!)
         }
         holder.photoRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
         val spacingInPixels = CommonUtil.dpToPx(8f, holder.itemView.context) // 将dp转换为像素
