@@ -17,7 +17,6 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.IOException
 import java.io.InputStream
 import kotlin.math.roundToInt
 
@@ -179,106 +178,5 @@ object CommonUtil {
     }
 
 
-//    fun getFilePathFromUri(context: Context, uri: Uri): String? {
-//        var filePath: String? = null
-//        val cursor: Cursor? = context.contentResolver.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
-//        cursor?.use {
-//            if (it.moveToFirst()) {
-//                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-//                filePath = it.getString(columnIndex)
-//            }
-//        }
-//        return filePath
-//    }
-//    fun createMultipartBodyParts(uris: List<Uri>, contentResolver: ContentResolver): List<MultipartBody.Part> {
-//        return uris.map { uri ->
-//            val file = File(getFilePathFromUri(uri, contentResolver))
-//            val requestFile = RequestBody.create("multipart/form-data".toMediaType(), file)
-//            MultipartBody.Part.createFormData("file", file.name, requestFile)
-//        }
-//    }
-//
-//    fun compressImage(uri: Uri, contentResolver: ContentResolver, outputFile: File, maxWidth: Int = 800, maxHeight: Int = 800, quality: Int = 80): File {
-//        val inputStream = contentResolver.openInputStream(uri)
-//        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-//        BitmapFactory.decodeStream(inputStream, null, options)
-//
-//        val (srcWidth, srcHeight) = options.outWidth to options.outHeight
-//        var scaleFactor = 1
-//
-//        if (srcWidth > maxWidth || srcHeight > maxHeight) {
-//            scaleFactor = Math.min(srcWidth / maxWidth, srcHeight / maxHeight)
-//        }
-//
-//        val finalOptions = BitmapFactory.Options().apply { inSampleSize = scaleFactor }
-//        val bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(uri), null, finalOptions)
-//
-//        FileOutputStream(outputFile).use { out ->
-//            bitmap?.compress(Bitmap.CompressFormat.JPEG, quality, out)
-//        }
-//
-//        return outputFile
-//    }
-
-//    fun compressVideo(inputFilePath: String, outputFilePath: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-//        val command = arrayOf("-i", inputFilePath, "-vcodec", "libx264", "-crf", "28", outputFilePath)
-//
-//        FFmpeg.executeAsync(command) { _, returnCode ->
-//            if (returnCode == com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS) {
-//                onSuccess()
-//            } else {
-//                val error = com.arthenica.mobileffmpeg.Config.getLastCommandOutput()
-//                onFailure(error ?: "Unknown error occurred")
-//            }
-//        }
-//    }
-
-//    fun compressVideo(context: Context, inputFilePath: String, outputFilePath: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-//        val command = arrayOf("-i", inputFilePath, "-vf", "boxblur=5:1", "-preset", "superfast",outputFilePath)
-//
-//        RxFFmpegInvoke.getInstance().runCommandRxJava(command).subscribe(object : RxFFmpegSubscriber() {
-//            override fun onFinish() {
-//                onSuccess()
-//            }
-//
-//            override fun onProgress(progress: Int, progressTime: Long) {
-//                // 更新进度
-//            }
-//
-//            override fun onCancel() {
-//                onFailure("Compression canceled")
-//            }
-//
-//            override fun onError(message: String) {
-//                onFailure(message)
-//            }
-//        })
-//    }
-
-
-    @Throws(IOException::class)
-    fun createTempFile(context: Context, prefix: String?, suffix: String?): File {
-        // 获取缓存目录
-        val cacheDir = context.cacheDir
-
-
-        // 创建临时文件
-        val tempFile = File.createTempFile(prefix, suffix, cacheDir)
-
-        return tempFile
-    }
-
-    fun removeFileExtension(filePath: String): String {
-        val lastIndexOfDot = filePath.lastIndexOf('.')
-        return if (lastIndexOfDot != -1) {
-            filePath.substring(0, lastIndexOfDot)
-        } else {
-            filePath // 如果没有找到点（即没有后缀），则返回原始字符串
-        }
-    }
-
-    fun isMp4File(filePath: String): Boolean {
-        return filePath.endsWith(".mp4", ignoreCase = true)
-    }
 
 }

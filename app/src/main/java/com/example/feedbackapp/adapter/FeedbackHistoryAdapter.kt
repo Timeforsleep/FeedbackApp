@@ -10,7 +10,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.feedbackapp.R
+import com.example.feedbackapp.activity.FeedbackHistoryActivity
 import com.example.feedbackapp.bean.FeedbackHistoryBean
+import com.example.feedbackapp.bean.FeedbackRequest
+import com.example.feedbackapp.common.REPLY_TYPE_ADD
 import com.example.feedbackapp.util.CommonUtil
 
 class FeedbackHistoryAdapter(private val activity: Activity) :
@@ -69,26 +72,24 @@ class FeedbackHistoryAdapter(private val activity: Activity) :
                     }
                 }
             }
-//            additionalDescriptionTV.setOnClickListener {
-//                (activity as FeedbackHistoryActivity).addAlertDialog.feedbackRequest =
-//                    FeedbackRequest(
-//                        targetId = feedback.id,
-//                        targetType = REPLY_TYPE_ADD,
-//                        userId = feedback.userId,
-//                        deviceId = feedback.deviceId,
-//                        status = feedback.status,
-//                        category = feedback.category,
-//                        tagId = feedback.tagId,
-//                        tagName = feedback.tagName,
-//                        content = feedback.content,
-//                        photos = null,
-//                        relation = null,
-//                        video = null,
-//                        startTime = null,
-//                        endTime = null)
-//
-//                (activity as FeedbackHistoryActivity).addAlertDialog.show()
-//            }
+            additionalDescriptionTV.setOnClickListener {
+                (activity as FeedbackHistoryActivity).addAlertDialog.feedbackRequest =
+                    FeedbackRequest(
+                        targetId = feedback.id,
+                        targetType = REPLY_TYPE_ADD,
+                        userId = feedback.userId,
+                        deviceId = feedback.deviceId,
+                        status = feedback.status,
+                        category = feedback.category,
+                        tagId = feedback.tagId,
+                        tagName = feedback.tagName,
+                        content = feedback.content,
+                        relation = null,
+                        startTime = null,
+                        endTime = null)
+
+                (activity as FeedbackHistoryActivity).addAlertDialog.show()
+            }
 
             // Set up photo RecyclerView
             if (feedback.localFile != null) {

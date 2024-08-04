@@ -72,8 +72,8 @@ class MainActivity : AppCompatActivity() {
 
     private val checkBox by lazy { findViewById<CheckBox>(R.id.checkbox) }
 
-    private var mFilePath: String? = null//拍完照临时的保存地方
-    private var uri: Uri? = null//
+    private var tempCaptureFilePath: String? = null//拍完照临时的保存地方
+    private var tempCaptureUri: Uri? = null//拍完照存在相册的uri
 
     private var alertDialog: AlertDialog? = null
 
@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private val PERMISSIONS_STORAGE = arrayOf(
+    private val permissionStorage = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
@@ -162,11 +162,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 //        getFeedbackId()
-        ActivityCompat.requestPermissions(
-            this@MainActivity,
-            PERMISSIONS_STORAGE,
-            STORAGE_REQUEST_CODE
-        )
+//        ActivityCompat.requestPermissions(
+//            this@MainActivity,
+//            permissionStorage,
+//            STORAGE_REQUEST_CODE
+//        )
         // 初始化监听
         setupListeners()
         // 初始化 UI
@@ -177,31 +177,8 @@ class MainActivity : AppCompatActivity() {
         val spacingInPixels = CommonUtil.dpToPx(8f, this) // 将dp转换为像素
         val itemDecoration = SimpleGridSpacingItemDecoration(spacingInPixels)
         questionTypeRV.addItemDecoration(itemDecoration)
-//        Glide.with(this)
-//            .load("http://club2.autoimg.cn/album/g32/M03/0E/5D/userphotos/2024/07/30/20/500_CjIFs2ao4guAKWlpAA1aDt6TgTw255.jpg")
-//            .placeholder(R.drawable.add_image)
-//            .into(imageTest)
-        lifecycleScope.launch {
-            NetworkInstance.getProblemScene().collectLatest {
-//                mainViewModel.typeBeans.value = it.result
-                if (it.returnCode == 0) {
-                    // 将 Map 转换为 List<TypeBean>
-                    val typeBeans = it.result.map { (id, typeName) ->
-                        TypeBean(id, typeName)
-                    }
-                    questionTypeAdapter.updateTypeBeansList(typeBeans)
-                    mainViewModel.questionSceneList.clear()
-                    mainViewModel.questionSceneList.addAll(typeBeans.toMutableList())
-                    if (typeBeans.isNotEmpty()) {
-                        mainViewModel.questionSelectedScene.value = typeBeans[0]
-                    }
-                } else {
-                    // 处理 API 错误，例如记录日志
-                    Log.e("MyViewModel", "API Error: ${it.message}")
-                }
-            }
-        }
 
+        getCategory()
         //lifedata
         val errorTypeObserver = Observer<Boolean> { isFucError ->
             if (isFucError) {
@@ -329,7 +306,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "还没同意隐私政策和保护声明", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            handleMedia(albumUriList)
+            handleAndUploadMedia(albumUriList)
         }
 
         checkBox.setOnCheckedChangeListener { _, isChecked ->
@@ -347,7 +324,6 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, "获取id成功", Toast.LENGTH_SHORT).show()
                     val feedbackId = it.result
                     val feedbackReq = FeedbackRequest(
-                        id = feedbackId,
                         targetId = 0,
                         targetType = 0,
                         userId = USER_ID,
@@ -410,7 +386,25 @@ class MainActivity : AppCompatActivity() {
                 // 请求权限
                 ActivityCompat.requestPermissions(
                     this@MainActivity,
-                    PERMISSIONS_STORAGE,
+                    permissionStorage,
+                    STORAGE_REQUEST_CODE
+                )
+            }
+        }
+    }
+
+    private fun openVideoPicker() {
+        when {
+            ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                Log.w("gyk", "openImagePicker: 打开图片")
+                chooseVideo(REQUEST_PICK_VIDEO)
+            }
+            else -> {
+                Log.w("gyk", "opeFnImagePicker: 请求图片")
+                // 请求权限
+                ActivityCompat.requestPermissions(
+                    this@MainActivity,
+                    permissionStorage,
                     STORAGE_REQUEST_CODE
                 )
             }
@@ -437,7 +431,7 @@ class MainActivity : AppCompatActivity() {
 //                albumUriList.add(albumBean)
 //                updateImageViews()
 //            }
-            uri?.let { selectedVideoUri ->
+            tempCaptureUri?.let { selectedVideoUri ->
                 if (albumUriList.size < 4) {
                     val albumBean = AlbumBean(selectedVideoUri)
                     albumBean.isFromCapture = true
@@ -521,7 +515,7 @@ class MainActivity : AppCompatActivity() {
         showImageNumTV.text = "已添加${albumUriList.size}/4张图片"
     }
 
-    // 获取视频文件的实际路径
+    // 获取视频和图片文件的实际路径
     private fun getRealPathFromURI(contentUri: Uri): String? {
         val proj = arrayOf(MediaStore.Video.Media.DATA)
         val cursor = contentResolver.query(contentUri, proj, null, null, null)
@@ -567,7 +561,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         chooseVideoTV.setOnClickListener {
-            choiceVideo(REQUEST_PICK_VIDEO)
+            openVideoPicker()
         }
 
         cancelTV.setOnClickListener {
@@ -622,7 +616,29 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //请求读取内部存储权限
+    private fun getCategory() {
+        lifecycleScope.launch {
+            NetworkInstance.getProblemScene().collectLatest {
+//                mainViewModel.typeBeans.value = it.result
+                if (it.returnCode == 0) {
+                    // 将 Map 转换为 List<TypeBean>
+                    val typeBeans = it.result.map { (id, typeName) ->
+                        TypeBean(id, typeName)
+                    }
+                    questionTypeAdapter.updateTypeBeansList(typeBeans)
+                    mainViewModel.questionSceneList.clear()
+                    mainViewModel.questionSceneList.addAll(typeBeans.toMutableList())
+                    if (typeBeans.isNotEmpty()) {
+                        mainViewModel.questionSelectedScene.value = typeBeans[0]
+                    }
+                } else {
+                    // 处理 API 错误，例如记录日志
+                    Log.e("MyViewModel", "API Error: ${it.message}")
+                }
+            }
+        }
+    }
+
 
     // 拍照并存储照片路径
     private fun dispatchTakePictureIntent() {
@@ -634,26 +650,19 @@ class MainActivity : AppCompatActivity() {
                     fileDir.mkdir()
                 }
                 val fileName = "IMG_" + System.currentTimeMillis() + ".jpg"
-                mFilePath = "${fileDir.absolutePath}/$fileName"
+                tempCaptureFilePath = "${fileDir.absolutePath}/$fileName"
                 val contentValues = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/Pictures")
                     } else {
-                        put(MediaStore.Images.Media.DATA, mFilePath)
+                        put(MediaStore.Images.Media.DATA, tempCaptureFilePath)
                     }
                 }
-                uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-//                photoFile?.also {
-//                    val photoURI: Uri = FileProvider.getUriForFile(
-//                        this,
-//                        "gyk.fileprovider",
-//                        it
-//                    )
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                tempCaptureUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempCaptureUri)
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-//                }
             }
         }
     }
@@ -664,7 +673,7 @@ class MainActivity : AppCompatActivity() {
         alertDialog?.dismiss()
     }
 
-    private fun choiceVideo(openVideoCode: Int) {
+    private fun chooseVideo(openVideoCode: Int) {
         val intent = Intent(
             Intent.ACTION_PICK,
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -679,7 +688,7 @@ class MainActivity : AppCompatActivity() {
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun handleMedia(list: MutableList<AlbumBean>) {
+    fun handleAndUploadMedia(list: MutableList<AlbumBean>) {
         Log.w("gykkk", "handleMedia: ${list}")
         this@MainActivity.upLoadBeans.clear()
         val inputFilePaths =
@@ -725,13 +734,13 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
-        private const val REQUEST_PICK_IMAGE = 1
-        private const val REQUEST_PICK_VIDEO = 7
-        private const val REQUEST_IMAGE_CAPTURE = 2
+       const val REQUEST_PICK_IMAGE = 1
+       const val REQUEST_PICK_VIDEO = 7
+       const val REQUEST_IMAGE_CAPTURE = 2
 
         // 权限请求码
-        private const val CAMERA_REQUEST_CODE = 100
-        private const val STORAGE_REQUEST_CODE = 1001
+        const val CAMERA_REQUEST_CODE = 100
+        const val STORAGE_REQUEST_CODE = 1001
 
     }
 
