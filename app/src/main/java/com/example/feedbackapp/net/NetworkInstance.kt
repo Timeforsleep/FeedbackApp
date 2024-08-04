@@ -107,13 +107,16 @@ object NetworkInstance {
 
     fun uploadFiles(id:Int,filePaths: List<String>): Flow<ApiResponse<Int>> = flow {
         val parts = filePaths.map { filePath ->
+            Log.w("gyk", "uploadFiles: 调用", )
             val file = File(filePath)
+            Log.w("gyk", "uploadFiles: 调用1", )
             if (!file.exists()) {
                 Log.w("gyk", "uploadFiles: 文件为空", )
             }
             val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
             MultipartBody.Part.createFormData("file", file.name, requestFile)
         }
+        Log.w("gyk", "uploadFiles: 调用2", )
         val response = apiService.uploadFiles(id,parts)
         emit(response)
     }.flowOn(Dispatchers.IO)

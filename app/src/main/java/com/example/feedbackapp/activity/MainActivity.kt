@@ -3,10 +3,10 @@ package com.example.feedbackapp.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.ThumbnailUtils
 import android.net.Uri
@@ -32,7 +32,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
@@ -62,12 +61,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Date
-import java.util.Locale
 
 
 class MainActivity : AppCompatActivity() {
@@ -78,17 +72,9 @@ class MainActivity : AppCompatActivity() {
 
     private val checkBox by lazy { findViewById<CheckBox>(R.id.checkbox) }
 
-//    private var feedbackId = 0
+    private var mFilePath: String? = null//拍完照临时的保存地方
+    private var uri: Uri? = null//
 
-
-
-//    private val agentWebFragment:AgentWebFragment?=null
-
-
-
-    //用于提交的bean类
-//    private val feedbackRequest = FeedbackRequest()
-//    private val imageTest by lazy{findViewById<ImageView>(R.id.imageViewTest)}
     private var alertDialog: AlertDialog? = null
 
     private val fucCL by lazy { findViewById<ConstraintLayout>(R.id.func_type_cl) }
@@ -297,9 +283,6 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("webUrl","https://comm.app.autohome.com.cn/baseservice/privacypolicy/protocols?a=2&showrecall=0")
             startActivity(intent)
         }
-//        button.setOnClickListener {
-//            handleMedia(albumUriList)
-//        }
         fucCL.setOnClickListener {
             mainViewModel.isFucError.value = true
         }
@@ -347,7 +330,6 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             handleMedia(albumUriList)
-//            submit()
         }
 
         checkBox.setOnCheckedChangeListener { _, isChecked ->
@@ -357,10 +339,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun submit() {
         if (mainViewModel.relationNumber.value == null) {
-            Log.w("gyk", "submit: 联系方式为空！", )
+            Log.w("gyk", "submit: 联系方式为空！")
         }
         lifecycleScope.launch {
-            this@MainActivity.upLoadBeans.clear()
             NetworkInstance.getFeedbackId().collectLatest {
                 if (it.returnCode == 0) {
                     Toast.makeText(this@MainActivity, "获取id成功", Toast.LENGTH_SHORT).show()
@@ -380,28 +361,30 @@ class MainActivity : AppCompatActivity() {
                         startTime = mainViewModel.startTime.value!!.toIntOrNull(),
                         endTime = mainViewModel.endTime.value!!.toIntOrNull()
                     )
-                    Log.w("gykId", "getFeedbackId: ${it.result}", )
+                    Log.w("gykId", "getFeedbackId: ${it.result}")
                     NetworkInstance.submitFeedback(
                         feedbackReq
                     ).collectLatest {
                         if (it.returnCode == 0) {
-                            // 将 Map 转换为 List<TypeBean>
-//                            Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT)
-//                                .show()
+                            val uploadFilesPathList = upLoadBeans.map { it.file.absolutePath }
+                                NetworkInstance.uploadFiles(feedbackId, uploadFilesPathList)
+                                    .collectLatest {
+                                        if (it.returnCode == 0) {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "添加图片和视频成功！",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } else {
+                                            // 处理 API 错误，例如记录日志
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "${it.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
                         } else {
-                            // 处理 API 错误，例如记录日志
-                            Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }
-                    val uploadFilesPathList = upLoadBeans.map { it.file.absolutePath }
-                    NetworkInstance.uploadFiles(feedbackId,uploadFilesPathList).collectLatest {
-                        if (it.returnCode == 0) {
-                            // 将 Map 转换为 List<TypeBean>
-                            Toast.makeText(this@MainActivity, "添加图片和视频成功！", Toast.LENGTH_SHORT)
-                                .show()
-                        } else {
-                            // 处理 API 错误，例如记录日志
                             Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
                                 .show()
                         }
@@ -412,36 +395,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-//        lifecycleScope.launch {
-//
-//            try {
-//                coroutineScope {
-//                    launch {
-//                        Log.w("gyk", "submit: ${uploadFilesPathList}", )
-//
-//                    }
-//
-//                    launch {
-//                        NetworkInstance.submitFeedback(
-//                            feedbackReq
-//                        ).collectLatest {
-//                            if (it.returnCode == 0) {
-//                                // 将 Map 转换为 List<TypeBean>
-//                                Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT)
-//                                    .show()
-//                            } else {
-//                                // 处理 API 错误，例如记录日志
-//                                Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
-//                                    .show()
-//                            }
-//                        }
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                Toast.makeText(this@MainActivity, "请求失败: ${e.message}", Toast.LENGTH_SHORT).show()
-//            }
-//        }
     }
 
 
@@ -449,15 +402,11 @@ class MainActivity : AppCompatActivity() {
     private fun openImagePicker() {
         when {
             ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
-                // 权限已经被授予，启动选择媒体的 Intent
-//                val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-//                startActivityForResult(intent, REQUEST_PICK_IMAGE)
                 Log.w("gyk", "openImagePicker: 打开图片")
                 chooseImage(REQUEST_PICK_IMAGE)
             }
             else -> {
                 Log.w("gyk", "opeFnImagePicker: 请求图片")
-//                alertDialog?.dismiss()
                 // 请求权限
                 ActivityCompat.requestPermissions(
                     this@MainActivity,
@@ -466,24 +415,6 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
-    }
-
-    private fun openVideoPicker() {
-        when {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
-                // 权限已经被授予，启动选择媒体的 Intent
-                choiceVideo(REQUEST_PICK_VIDEO)
-            }
-            else -> {
-                // 请求权限
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    STORAGE_REQUEST_CODE
-                )
-            }
-        }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -497,13 +428,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if ((requestCode == REQUEST_IMAGE_CAPTURE) && resultCode == RESULT_OK) {
-            if (albumUriList.size < 4) {
-                val file = currentPhotoPath?.let { File(it) }
-                val uri = Uri.fromFile(file)
-                val albumBean = AlbumBean(uri)
-                albumBean.isFromCapture = true
-                albumUriList.add(albumBean)
-                updateImageViews()
+            Log.w("gyk", "onActivityResult: 拍完照了", )
+//            if (albumUriList.size < 4) {
+////                val file = currentPhotoPath?.let { File(it) }
+////                val uri = Uri.fromFile(file)
+//                val albumBean = AlbumBean(uri)
+//                albumBean.isFromCapture = true
+//                albumUriList.add(albumBean)
+//                updateImageViews()
+//            }
+            uri?.let { selectedVideoUri ->
+                if (albumUriList.size < 4) {
+                    val albumBean = AlbumBean(selectedVideoUri)
+                    albumBean.isFromCapture = true
+                    albumUriList.add(albumBean)
+                    updateImageViews()
+                }
             }
         }
         if ((requestCode == REQUEST_PICK_VIDEO) && resultCode == RESULT_OK) {
@@ -550,16 +490,16 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     // 使用ContentResolver通过URI获取输入流
-                    val inputStream = contentResolver.openInputStream(albumUri.uri)
+//                    val inputStream = contentResolver.openInputStream(albumUri.uri)
 //                    uploadImage(albumUri.uri,contentResolver)
-
                     // 将输入流解析为Bitmap
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
+//                    val bitmap = BitmapFactory.decodeStream(inputStream)
 
                     // 关闭输入流
-                    inputStream!!.close()
+//                    inputStream!!.close()
+                    Log.w("gykuri", "updateImageViews: ${albumUri.uri}", )
                     // 显示Bitmap到ImageView
-                    imageView.setImageBitmap(bitmap)
+                    imageView.setImageURI(albumUri.uri)
                     imageView.setOnClickListener {
                         val intent = Intent(this@MainActivity, WatchPicActivity::class.java)
                         intent.putExtra("photoUrl", albumUri.uri.toString())
@@ -579,7 +519,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
         showImageNumTV.text = "已添加${albumUriList.size}/4张图片"
-
     }
 
     // 获取视频文件的实际路径
@@ -614,16 +553,6 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
 
-//        // 这里设置了弹窗的背景透明
-//        alertDialog!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
-//        val window = alertDialog!!.window
-//        window?.setContentView(dialogView)
-//
-//        // 使弹窗的宽度占满屏幕的宽度
-//        window?.setLayout(
-//            WindowManager.LayoutParams.MATCH_PARENT,
-//            WindowManager.LayoutParams.WRAP_CONTENT
-//        )
 
         // 设置点击事件
         takePhotoTV.setOnClickListener {
@@ -700,71 +629,35 @@ class MainActivity : AppCompatActivity() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // 创建用于保存照片的文件
-                val photoFile: File? = try {
-                    createImageFile()
-                } catch (ex: IOException) {
-                    null
+                val fileDir = File(Environment.getExternalStorageDirectory(), "Pictures")
+                if (!fileDir.exists()) {
+                    fileDir.mkdir()
                 }
-                photoFile?.also {
-                    val photoURI: Uri = FileProvider.getUriForFile(
-                        this,
-                        "gyk.fileprovider",
-                        it
-                    )
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                val fileName = "IMG_" + System.currentTimeMillis() + ".jpg"
+                mFilePath = "${fileDir.absolutePath}/$fileName"
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/Pictures")
+                    } else {
+                        put(MediaStore.Images.Media.DATA, mFilePath)
+                    }
+                }
+                uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+//                photoFile?.also {
+//                    val photoURI: Uri = FileProvider.getUriForFile(
+//                        this,
+//                        "gyk.fileprovider",
+//                        it
+//                    )
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-                }
+//                }
             }
         }
     }
 
-    @Throws(IOException::class)
-    private fun createImageFile(): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(
-            "JPEG_${timeStamp}_",
-            ".jpg",
-            storageDir
-        ).apply {
-            currentPhotoPath = absolutePath
-        }
-    }
-
-//    @Throws(IOException::class)
-//    private fun createOutputFile(context:Context,fileName: String, isVideo: Boolean): File {
-//        // 获取应用的外部文件目录
-////        val storageDir: File = context.cacheDir
-//        // 如果目录不存在，则创建它
-//        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-//        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-//        // 根据是否是视频来设置文件后缀
-//        val fileExtension = if (isVideo) ".mp4" else ".jpg"
-//
-//        // 创建临时文件
-//        return File.createTempFile(
-//            fileName, // 前缀
-//            fileExtension, // 后缀
-//            storageDir // 目录
-//        ).apply {
-//            // 设置文件路径
-//            Log.w("FileCreation", "Created file at: ${absolutePath}")
-//        }
-//    }
-//
-//    private fun createOutputFile(filePath: String): File {
-//        val file = File(filePath)
-//        // 如果文件目录不存在，则创建它
-//        file.parentFile?.let {
-//            if (!it.exists()) {
-//                it.mkdirs()
-//            }
-//        }
-//        return file.apply {
-//            // 设置文件路径
-//            Log.w("gykFileCreation", "Created file at: ${absolutePath}")
-//        }
-//    }
 
 
     private fun dismissAlertDialog() {
@@ -784,190 +677,52 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, openImageCode)
     }
 
-//    @RequiresApi(Build.VERSION_CODES.O)
-//    fun uploadMedia(filePaths:List<String> ) {
-//        Log.w("gykStartTime", "uploadMedia: ${convert(System.currentTimeMillis())}")
-//        lifecycleScope.launch {
-//            NetworkInstance.uploadFiles(filePaths).flowOn(Dispatchers.IO).collect {
-//                    response ->
-//                Log.w("gykEndTime", "uploadMedia: ${convert(System.currentTimeMillis())}")
-//                    // 处理响应
-//                    if (response.returnCode == 0) {
-//                        Log.d("Upload", "File uploaded successfully")
-//                    } else {
-//                        Log.e("Upload", "Failed to upload file: ${response.message}")
-//                    }
-//            }
-//        }
-//    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun convert(timestamp:Long): String {
-
-        // 将时间戳转换为Instant对象
-        val instant = Instant.ofEpochMilli(timestamp)
-
-        // 使用系统默认时区将Instant对象转换为LocalDateTime对象
-        val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-
-        // 定义日期时间格式
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")
-
-        // 格式化LocalDateTime对象为字符串
-        return dateTime.format(formatter)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun compressMedia(
-        context: Context,
-        inputFileBeans: List<UploadBean>,
-        uploadBeanList: List<UploadBean>
-    ){
-        //1.清空原先的文件队列
-//        val isAllSuccess = false
-        Log.w("gykkk", "compressMedia: 执行compress")
-//        lifecycleScope.launch(Dispatchers.IO) {
-        inputFileBeans.zip(uploadBeanList)
-            .forEachIndexed { index, (inputFileBean, outputFileBean) ->
-                val inputFile = inputFileBean.file
-                val outputFile = outputFileBean.file
-                if (!outputFile.exists()) {
-                    Log.e("gyk", "Output file does not exist: ${outputFile.absolutePath}")
-                }
-                try {
-                    Log.w("gyk", "准备压缩dcompressMedia: ", )
-                    if (CommonUtil.isMp4File(inputFile.absolutePath)) {
-                        val success = CommonUtil.compressMedia(
-                            context,
-                            inputFile.absolutePath,
-                            outputFile.absolutePath
-                        )
-                        if (success) {
-                            Log.w("gyk", "compressAndUploadMedia: 压缩成功")
-                        } else {
-                            Log.w("gyk", "compressAndUploadMedia: 压缩失败")
-                        }
-                    }
-//                    if (index == uploadBeanList.size - 1) {
-////                        canUploadFile = true
-//                        submit()
-//                    }
-                } catch (e: Exception) {
-                    Log.e("gyk", "compressAndUploadMedia: Error during compression", e)
-//                    return false
-                }
-//            }
-            }
-//        return false
-    }
-
-
-
-
-//    fun uploadImage() {
-//        lifecycleScope.launch {
-//            NetworkInstance.uploadFile(uri, contentResolver).flowOn(Dispatchers.IO)
-//                .collect { response ->
-//                    // 处理响应
-//                    if (response.returnCode == 0) {
-//                        Log.d("Upload", "File uploaded successfully")
-//                    } else {
-//                        Log.e("Upload", "Failed to upload file: ${response.message}")
-//                    }
-//                }
-//        }
-//    }
-//
-//    fun uploadVideos() {
-//        lifecycleScope.launch {
-//            NetworkInstance.uploadFiles(albumUriList.map { it.uri }, contentResolver)
-//                .flowOn(Dispatchers.IO)
-//                .collectLatest {
-//                        response->
-//                    if (response.returnCode==0) {
-//                        Log.d("Upload", "File uploaded successfully")
-//                    } else {
-//                        Log.e("Upload", "Failed to upload file: ${response.message}")
-//                    }
-//                }
-//        }
-//    }
-
-//    private val selectVideoLauncher =
-//        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-//            uri?.let {
-//                // 选中视频后进行压缩和上传
-//                val inputFilePath = getFilePathFromUri(uri)
-//                val outputFilePath =
-//                    getExternalFilesDir(null)?.absolutePath + "/compressed_video.mp4"
-//                compressAndUploadVideo(inputFilePath, outputFilePath)
-//            }
-//        }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun handleMedia(list: MutableList<AlbumBean>) {
-        Log.w("gykkk", "handleMedia: ${list}", )
+        Log.w("gykkk", "handleMedia: ${list}")
+        this@MainActivity.upLoadBeans.clear()
         val inputFilePaths =
             list.map { albumBean ->
-                if (!albumBean.isFromCapture) {
+//                if (!albumBean.isFromCapture) {
                     getFilePathFromUri(albumBean.uri, contentResolver)
-                } else {
-                    albumBean.uri.toString()
-                }
+//                } else {
+//                    albumBean.uri.toString()
+//                }
         }
-//        val inputFileBeans = inputFilePaths.map {
-//            UploadBean(File(it),it.endsWith(".mp4"))
-//        }
-        //创建要上传的outputfile
-//        Log.w("gyk", "handleMedia:${inputFilePaths} ")
-//        val outputFilePaths = inputFilePaths.map { inputFilePath ->
-//            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-//            getExternalFilesDir(null)?.absolutePath + "/compressed_${timestamp}" + File(
-//                inputFilePath
-//            ).name
-//        }
-//        inputFilePaths.forEach {
-//                outputPath ->
-//            val outputFile = File(outputPath)
-//            if (!outputFile.exists()) {
-//                outputFile.createNewFile()
-//            }
-//            //TODO判断是否是视频
-//            //2.添加进文件队列
-//            if (outputPath.endsWith(".mp4")) {
-//                val uploadBean = UploadBean(outputFile)
-//                uploadBean.isVideo = true
-//
-//            } else {
-//                this.upLoadBeans.add(UploadBean(outputFile))
-//            }
-//        }
         inputFilePaths.forEach {
             inputFilePath->
             val inputFile = File(inputFilePath)
-//            inputFile.absolutePath
+//            if (!inputFile.exists()) {
+//                inputFile.createNewFile()
+//            }
             this.upLoadBeans.add(UploadBean(inputFile))
         }
-
-
-//        Log.w("gyk", "outputMedia:${outputFilePaths} ")
-//        Log.w("gyk", "outputMedia:${outputFilePaths} ")
-//        lifecycleScope.launch {
-//            compressMedia(this@MainActivity,inputFileBeans,upLoadBeans)
+//        inputFilePaths.forEach {
+//
 //        }
+
+
         submit()
     }
 
-//    private fun compressAndUploadVideo(inputFilePath: String, outputFilePath: String) {
-//        CommonUtil.compressVideo(this, inputFilePath, outputFilePath,
-//            onSuccess = {
-//                // 压缩成功后进行上传
-//                uploadVideo(outputFilePath)
-//            },
-//            onFailure = { error ->
-//                // 处理压缩失败
-//            })
-//    }
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val imageFileName = "JPEG_" + timeStamp + "_"
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val image = File.createTempFile(
+            imageFileName,  /* prefix */
+            ".jpg",  /* suffix */
+            storageDir /* directory */
+        )
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.absolutePath
+        return image
+    }
+
 
     companion object {
         private const val REQUEST_PICK_IMAGE = 1
