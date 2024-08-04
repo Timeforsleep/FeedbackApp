@@ -58,9 +58,7 @@ dependencies {
 
     implementation 'me.zhanghai.android.materialratingbar:library:1.4.0'
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-    implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4'
-    implementation 'com.github.microshow:RxFFmpeg:4.9.0-lite'
-
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.4'
     implementation 'io.github.justson:agentweb-core:v5.1.1-androidx'
     implementation 'com.tencent:mmkv:1.2.13'
 }

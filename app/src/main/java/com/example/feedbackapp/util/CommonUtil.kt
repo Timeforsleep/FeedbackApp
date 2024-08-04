@@ -10,12 +10,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Base64
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import io.microshow.rxffmpeg.RxFFmpegInvoke
-import io.microshow.rxffmpeg.RxFFmpegSubscriber
-import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -23,8 +19,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.math.roundToInt
 
 
@@ -261,28 +255,6 @@ object CommonUtil {
 //        })
 //    }
 
-    suspend fun compressMedia(context: Context, inputFilePath: String, outputFilePath: String): Boolean = suspendCancellableCoroutine { continuation ->
-        val command = arrayOf("ffmpeg", "-y", "-i", inputFilePath, "-vcodec", "libx264", "-crf", "28", outputFilePath)
-        Log.w("gyk", "compressMedia: $inputFilePath $outputFilePath")
-
-        RxFFmpegInvoke.getInstance().runCommandRxJava(command).subscribe(object : RxFFmpegSubscriber() {
-            override fun onFinish() {
-                continuation.resume(true)
-            }
-
-            override fun onProgress(progress: Int, progressTime: Long) {
-                Log.w("gykprocess", "onProgress: $progress")
-            }
-
-            override fun onCancel() {
-                continuation.resume(false) // Compression canceled
-            }
-
-            override fun onError(message: String) {
-                continuation.resumeWithException(Exception(message))
-            }
-        })
-    }
 
     @Throws(IOException::class)
     fun createTempFile(context: Context, prefix: String?, suffix: String?): File {

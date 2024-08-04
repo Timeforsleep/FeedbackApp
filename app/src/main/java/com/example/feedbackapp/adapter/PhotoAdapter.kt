@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.feedbackapp.R
+import com.example.feedbackapp.activity.AgentWebViewActivity
 import com.example.feedbackapp.activity.WatchPicActivity
 
 class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
@@ -25,6 +26,7 @@ class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAda
     }
     inner class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val photoImageView:ImageView = itemView.findViewById(R.id.photoImageView)
+        val isVideoIv:ImageView = itemView.findViewById(R.id.is_video_iv)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -41,19 +43,26 @@ class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAda
             intent.putExtra("photoUrl", photoUrl)
             context.startActivity(intent)
         }
-//        try {
-//            CommonUtil.loadBase64Image(photoUrl, holder.photoImageView)
-//        } catch (e: Exception) {
-//
-//            holder.photoImageView.load(photoUrl){
-//                crossfade(true)
-//                placeholder(R.drawable.add_image)
-//            }
-//        }
-        Glide.with(context)
-            .load(photoUrl)
-            .placeholder(R.drawable.add_image)
-            .into(holder.photoImageView)
+        holder.isVideoIv.setOnClickListener {
+            val intent = Intent(context,AgentWebViewActivity::class.java)
+            intent.putExtra("webUrl",photoUrl)
+            context.startActivity(intent)
+        }
+        if (photoUrl.endsWith(".mp4")) {
+            Glide.with(context)
+                .asBitmap()
+                .load(photoUrl)
+                .thumbnail(0.1f) // 加载视频的缩略图，0.1f表示加载10%的帧数
+                .into(holder.photoImageView)
+            holder.isVideoIv.visibility = View.VISIBLE
+        } else {
+            Glide.with(context)
+                .load(photoUrl)
+                .placeholder(R.drawable.add_image)
+                .into(holder.photoImageView)
+            holder.isVideoIv.visibility = View.GONE
+        }
+
     }
 
     override fun getItemCount(): Int = photosList.size
