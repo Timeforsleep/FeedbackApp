@@ -86,9 +86,10 @@ class FeedbackHistoryAdapter(private val activity: Activity) :
                         content = feedback.content,
                         relation = null,
                         startTime = null,
-                        endTime = null)
-
+                        endTime = null
+                    )
                 (activity as FeedbackHistoryActivity).addAlertDialog.show()
+
             }
 
             // Set up photo RecyclerView

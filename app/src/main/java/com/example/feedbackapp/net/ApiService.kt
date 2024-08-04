@@ -2,7 +2,6 @@ package com.example.feedbackapp.net
 
 import com.example.feedbackapp.bean.FeedbackHistoryBean
 import com.example.feedbackapp.bean.FeedbackRequest
-import com.example.feedbackapp.bean.ScoreBean
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -23,9 +22,9 @@ interface ApiService {
     suspend fun addFeedback(
         @Body feedback: FeedbackRequest): ApiResponse<Int>
 
-    @POST("/advice/score")
+    @GET("advice/score")
     suspend fun addScore(
-        @Body scoreBean: ScoreBean
+        @Query("usrId") userid:Int,@Query("score") score:Double
     ):ApiResponse<Int>
 
     @GET("advice/list")

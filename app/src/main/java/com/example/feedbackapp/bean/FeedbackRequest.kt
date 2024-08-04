@@ -6,6 +6,7 @@ import com.example.feedbackapp.common.REPLY_TYPE_FEEDBACK
 
 // 请求参数数据类
 data class FeedbackRequest(
+    var id:Int = 0,
     var targetId: Int = 0,
     var targetType: Int = REPLY_TYPE_FEEDBACK,
     var userId: Int,

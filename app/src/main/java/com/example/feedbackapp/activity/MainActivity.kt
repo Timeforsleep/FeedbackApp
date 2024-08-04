@@ -326,6 +326,7 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, "获取id成功", Toast.LENGTH_SHORT).show()
                     val feedbackId = it.result
                     val feedbackReq = FeedbackRequest(
+                        id = feedbackId,
                         targetId = 0,
                         targetType = 0,
                         userId = USER_ID,
@@ -628,6 +629,7 @@ class MainActivity : AppCompatActivity() {
                     val typeBeans = it.result.map { (id, typeName) ->
                         TypeBean(id, typeName)
                     }
+                    Log.w("gyk类别", "getCategory: ${typeBeans}", )
                     questionTypeAdapter.updateTypeBeansList(typeBeans)
                     mainViewModel.questionSceneList.clear()
                     mainViewModel.questionSceneList.addAll(typeBeans.toMutableList())

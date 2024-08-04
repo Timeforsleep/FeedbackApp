@@ -1,6 +1,5 @@
 package com.example.feedbackapp.net
 
-import com.example.feedbackapp.net.HttpDns
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
@@ -11,6 +10,6 @@ object OkHttpClientInstance {
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
         .connectionPool(ConnectionPool(5,5, TimeUnit.MINUTES))
-        .dns(HttpDns())//添加okhttpdns
+//        .dns(HttpDns())//添加okhttpdns
         .build()
 }

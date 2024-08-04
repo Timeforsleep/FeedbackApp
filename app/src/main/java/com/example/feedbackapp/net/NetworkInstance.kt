@@ -53,7 +53,7 @@ object NetworkInstance {
 
 
     fun addScore(scoreBean: ScoreBean): Flow<ApiResponse<Int>> = flow {
-        val response = apiService.addScore(scoreBean)
+        val response = apiService.addScore(scoreBean.userId,scoreBean.score)
         Log.w("addScore", "addScore: ${scoreBean}")
         emit(response)
     }.flowOn(Dispatchers.IO)

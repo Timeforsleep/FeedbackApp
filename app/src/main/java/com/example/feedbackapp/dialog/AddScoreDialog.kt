@@ -6,7 +6,6 @@ import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import com.example.feedbackapp.R
-import com.example.feedbackapp.activity.FeedbackHistoryActivity
 import com.example.feedbackapp.activity.MainActivity
 import com.example.feedbackapp.bean.ScoreBean
 import com.example.feedbackapp.net.NetworkInstance
@@ -54,18 +53,17 @@ class AddScoreDialog(private val activity: MainActivity) {
                         withContext(Dispatchers.Main){
                             Toast.makeText(activity, "追加描述成功！", Toast.LENGTH_SHORT).show()
                             dialog.dismiss()
-                            (activity as FeedbackHistoryActivity).refreshFeedbackHistory()
                         }
                     } else {
                         // 处理 API 错误，例如记录日志
                         withContext(Dispatchers.Main){
                             Toast.makeText(activity, "${it.message}", Toast.LENGTH_SHORT).show()
                             dialog.dismiss()
-                            (activity as FeedbackHistoryActivity).refreshFeedbackHistory()
                         }
                     }
                 }
             }
+            dialog.dismiss()
         }
     }
 

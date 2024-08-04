@@ -202,6 +202,7 @@ class AddAlertDialog(private val activity: Activity) {
                     NetworkInstance.getFeedbackId().collectLatest {
                         if (it.returnCode == 0) {
                             val feedbackId = it.result//用于上传图片和视频
+                            feedbackRequest!!.id = feedbackId
                             NetworkInstance.submitFeedback(feedbackRequest!!).collectLatest {
                                 if (it.returnCode == 0) {
                                     // 将 Map 转换为 List<TypeBean>
