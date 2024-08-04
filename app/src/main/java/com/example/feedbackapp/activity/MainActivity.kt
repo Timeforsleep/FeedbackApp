@@ -19,7 +19,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
@@ -67,7 +66,7 @@ import java.util.Date
 
 class MainActivity : AppCompatActivity() {
     private var currentPhotoPath: String? = null
-    private val button: Button by lazy { findViewById(R.id.button) }
+//    private val button: Button by lazy { findViewById(R.id.button) }
     //标识是否能上传了
     private var canUploadFile = false
     var addScoreAlertDialog = AddScoreDialog(this)
@@ -148,15 +147,8 @@ class MainActivity : AppCompatActivity() {
     private val questionTypeAdapter by lazy { QuestionTypeAdapter(mainViewModel) }
 
     private val albumUriList = mutableListOf<AlbumBean>()
-//    private val imageUrlList = mutableListOf<String>()
-//    private val videoUrlList = mutableListOf<String>()
     private val upLoadBeans = mutableListOf<UploadBean>()
-//    private val inputFileBeans = mutableListOf<UploadBean>()
-//    private val outputFileBeans = mutableListOf<UploadBean>()
 
-//    fun getFeedbackId() {
-
-//    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
