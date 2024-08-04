@@ -51,6 +51,7 @@ import com.example.feedbackapp.common.EMERGENCY_MOST
 import com.example.feedbackapp.common.EMERGENCY_NORMAL
 import com.example.feedbackapp.common.IS_AGREE_KEY
 import com.example.feedbackapp.common.USER_ID
+import com.example.feedbackapp.dialog.AddScoreDialog
 import com.example.feedbackapp.net.NetworkInstance
 import com.example.feedbackapp.util.CommonUtil
 import com.example.feedbackapp.util.CommonUtil.getFilePathFromUri
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity() {
     private val button: Button by lazy { findViewById(R.id.button) }
     //标识是否能上传了
     private var canUploadFile = false
+    var addScoreAlertDialog = AddScoreDialog(this)
 
     private val checkBox by lazy { findViewById<CheckBox>(R.id.checkbox) }
 
@@ -365,6 +367,7 @@ class MainActivity : AppCompatActivity() {
                                 .show()
                         }
                     }
+                    addScoreAlertDialog.show()
                 } else {
                     // 处理 API 错误，例如记录日志
                     Log.e("MyViewModel", "API Error: ${it.message}")

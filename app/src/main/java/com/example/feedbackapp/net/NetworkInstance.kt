@@ -3,6 +3,7 @@ package com.example.feedbackapp.net
 import android.util.Log
 import com.example.feedbackapp.bean.FeedbackHistoryBean
 import com.example.feedbackapp.bean.FeedbackRequest
+import com.example.feedbackapp.bean.ScoreBean
 import com.example.feedbackapp.common.BASE_URL
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Dispatchers
@@ -51,14 +52,20 @@ object NetworkInstance {
         }
 
 
+    fun addScore(scoreBean: ScoreBean): Flow<ApiResponse<Int>> = flow {
+        val response = apiService.addScore(scoreBean)
+        Log.w("addScore", "addScore: ${scoreBean}")
+        emit(response)
+    }.flowOn(Dispatchers.IO)
+        .catch { e ->
+            // 处理异常，例如记录日志或发出错误通知
+            Log.e("FeedbackViewModel", "Error occurred: ${e.message}")
+            // 这里也可以通过 emit 发送一个错误结果，视需求而定
+        }
+
 
 
     fun submitFeedback(feedbackRequest: FeedbackRequest): Flow<ApiResponse<Int>> = flow {
-//        var photoAndVideoParts:List<MultipartBody.Part>? = null
-//        feedbackRequest.photoFiles?.let {
-//            photoAndVideoParts = NetUtil.createMultipartBodyParts(it)
-//        }
-//        val photoAndVideoParts = NetUtil.createMultipartBodyParts(feedbackRequest.photoFiles)
         val response = apiService.addFeedback(feedbackRequest)
         Log.w("FeedbackViewModel", "submitFeedback: $response")
         emit(response)

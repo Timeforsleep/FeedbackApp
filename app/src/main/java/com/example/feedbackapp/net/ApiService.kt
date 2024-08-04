@@ -2,6 +2,7 @@ package com.example.feedbackapp.net
 
 import com.example.feedbackapp.bean.FeedbackHistoryBean
 import com.example.feedbackapp.bean.FeedbackRequest
+import com.example.feedbackapp.bean.ScoreBean
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -22,13 +23,14 @@ interface ApiService {
     suspend fun addFeedback(
         @Body feedback: FeedbackRequest): ApiResponse<Int>
 
+    @POST("/advice/score")
+    suspend fun addScore(
+        @Body scoreBean: ScoreBean
+    ):ApiResponse<Int>
+
     @GET("advice/list")
     suspend fun getFeedbackHistory(@Query("userId") userId: Int): ApiResponse<List<FeedbackHistoryBean>>
 
-//    @Multipart
-//    @POST("upload")
-//    suspend fun uploadFile(@Part file: MultipartBody.Part): ApiResponse<Int>
-//
     @Multipart
     @POST("files/upload")
     suspend fun uploadFiles(@Part("id") id: Int,@Part files: List<MultipartBody.Part>): ApiResponse<Int>
