@@ -19,9 +19,13 @@ class AgentWebViewActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+//        findViewById<View>(R.id.back_view).setOnClickListener {
+//            this.finish()
+//        }
         val webUrl = intent.getStringExtra("webUrl")?:""
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, AgentWebFragment(webUrl))
             .commit()
     }
+
 }

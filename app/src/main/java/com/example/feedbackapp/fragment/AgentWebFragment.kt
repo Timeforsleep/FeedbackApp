@@ -7,7 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebSettings
 import android.webkit.WebView
-import android.widget.LinearLayout
+import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import com.example.feedbackapp.R
 import com.just.agentweb.AgentWeb
@@ -26,19 +27,24 @@ private const val ARG_PARAM2 = "param2"
  */
 class AgentWebFragment(val webUrl:String) : Fragment() {
     private lateinit var mAgentWeb: AgentWeb
+    private lateinit var backView:ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_agent_web, container, false)
+        val view =  inflater.inflate(R.layout.fragment_agent_web, container, false)
+        backView = view.findViewById(R.id.back_view)
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         val url = webUrl
+        backView.setOnClickListener {
+            activity?.finish()
+        }
         mAgentWeb = AgentWeb.with(this)
-            .setAgentWebParent(view as LinearLayout, -1, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+            .setAgentWebParent(view as FrameLayout, -1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
             .useDefaultIndicator(-1, 3)
             .setSecurityType(AgentWeb.SecurityType.STRICT_CHECK)
 //            .setMainFrameErrorView(R.layout.agentweb_error_page, -1)
