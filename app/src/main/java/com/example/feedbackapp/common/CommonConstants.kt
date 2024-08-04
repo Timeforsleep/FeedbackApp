@@ -1,6 +1,6 @@
 package com.example.feedbackapp.common
 
-const val BASE_URL = "http://10.168.161.81:18090/api/"
+const val BASE_URL = "https://9538691movj6.vicp.fun/api/"
 
 
 const val EMERGENCY_NORMAL = 0

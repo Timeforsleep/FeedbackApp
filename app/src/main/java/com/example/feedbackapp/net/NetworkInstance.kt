@@ -108,6 +108,9 @@ object NetworkInstance {
     fun uploadFiles(id:Int,filePaths: List<String>): Flow<ApiResponse<Int>> = flow {
         val parts = filePaths.map { filePath ->
             val file = File(filePath)
+            if (!file.exists()) {
+                Log.w("gyk", "uploadFiles: 文件为空", )
+            }
             val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
             MultipartBody.Part.createFormData("file", file.name, requestFile)
         }

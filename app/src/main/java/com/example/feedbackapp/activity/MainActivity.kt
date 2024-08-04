@@ -57,7 +57,6 @@ import com.example.feedbackapp.util.CommonUtil
 import com.example.feedbackapp.util.CommonUtil.getFilePathFromUri
 import com.example.feedbackapp.util.MMKVUtil
 import com.example.feedbackapp.viewmodel.MainViewModel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
@@ -79,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 
     private val checkBox by lazy { findViewById<CheckBox>(R.id.checkbox) }
 
-    private var feedbackId = 0
+//    private var feedbackId = 0
 
 
 
@@ -167,29 +166,16 @@ class MainActivity : AppCompatActivity() {
 //    private val inputFileBeans = mutableListOf<UploadBean>()
 //    private val outputFileBeans = mutableListOf<UploadBean>()
 
-    fun getFeedbackId() {
-        lifecycleScope.launch {
-            NetworkInstance.getFeedbackId().collectLatest {
-                if (it.returnCode == 0) {
-                    if (feedbackId == 0) {
-                        feedbackId = it.result
-                    }
-                    // 将 Map 转换为 List<TypeBean>
-                    Log.w("gykId", "getFeedbackId: ${it.result}", )
-                } else {
-                    // 处理 API 错误，例如记录日志
-                    Log.e("MyViewModel", "API Error: ${it.message}")
-                }
-            }
-        }
-    }
+//    fun getFeedbackId() {
+
+//    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        getFeedbackId()
+//        getFeedbackId()
         ActivityCompat.requestPermissions(
             this@MainActivity,
             PERMISSIONS_STORAGE,
@@ -370,60 +356,92 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun submit() {
-        val feedbackReq = FeedbackRequest(
-            id = feedbackId,
-            targetId = 0,
-            targetType = 0,
-            userId = USER_ID,
-            deviceId = DEVICE_ID,
-            status = mainViewModel.questionType.value!!,
-            category = if (mainViewModel.isFucError.value!!) 0 else 1,
-            tagId = mainViewModel.questionSelectedScene.value!!.id.toInt(),
-            tagName = mainViewModel.questionSelectedScene.value!!.typeName,
-            content = mainViewModel.feedbackContent.value!!,
-            relation = mainViewModel.relationNumber.value,
-            startTime = mainViewModel.startTime.value!!.toIntOrNull(),
-            endTime = mainViewModel.endTime.value!!.toIntOrNull()
-        )
+        if (mainViewModel.relationNumber.value == null) {
+            Log.w("gyk", "submit: 联系方式为空！", )
+        }
         lifecycleScope.launch {
-        val uploadFilesPathList = upLoadBeans.map { it.file.absolutePath }
-            try {
-                coroutineScope {
-                    launch {
-                        Log.w("gyk", "submit: ${uploadFilesPathList.toString()}", )
-                        NetworkInstance.uploadFiles(feedbackId,uploadFilesPathList).collectLatest {
-                            if (it.returnCode == 0) {
-                                // 将 Map 转换为 List<TypeBean>
-                                Toast.makeText(this@MainActivity, "添加图片和视频成功！", Toast.LENGTH_SHORT)
-                                    .show()
-                            } else {
-                                // 处理 API 错误，例如记录日志
-                                Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
+            this@MainActivity.upLoadBeans.clear()
+            NetworkInstance.getFeedbackId().collectLatest {
+                if (it.returnCode == 0) {
+                    Toast.makeText(this@MainActivity, "获取id成功", Toast.LENGTH_SHORT).show()
+                    val feedbackId = it.result
+                    val feedbackReq = FeedbackRequest(
+                        id = feedbackId,
+                        targetId = 0,
+                        targetType = 0,
+                        userId = USER_ID,
+                        deviceId = DEVICE_ID,
+                        status = mainViewModel.questionType.value!!,
+                        category = if (mainViewModel.isFucError.value!!) 0 else 1,
+                        tagId = mainViewModel.questionSelectedScene.value!!.id.toInt(),
+                        tagName = mainViewModel.questionSelectedScene.value!!.typeName,
+                        content = mainViewModel.feedbackContent.value!!,
+                        relation = mainViewModel.relationNumber.value,
+                        startTime = mainViewModel.startTime.value!!.toIntOrNull(),
+                        endTime = mainViewModel.endTime.value!!.toIntOrNull()
+                    )
+                    Log.w("gykId", "getFeedbackId: ${it.result}", )
+                    NetworkInstance.submitFeedback(
+                        feedbackReq
+                    ).collectLatest {
+                        if (it.returnCode == 0) {
+                            // 将 Map 转换为 List<TypeBean>
+//                            Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT)
+//                                .show()
+                        } else {
+                            // 处理 API 错误，例如记录日志
+                            Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
-
-                    launch {
-                        NetworkInstance.submitFeedback(
-                            feedbackReq
-                        ).collectLatest {
-                            if (it.returnCode == 0) {
-                                // 将 Map 转换为 List<TypeBean>
-                                Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT)
-                                    .show()
-                            } else {
-                                // 处理 API 错误，例如记录日志
-                                Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
+                    val uploadFilesPathList = upLoadBeans.map { it.file.absolutePath }
+                    NetworkInstance.uploadFiles(feedbackId,uploadFilesPathList).collectLatest {
+                        if (it.returnCode == 0) {
+                            // 将 Map 转换为 List<TypeBean>
+                            Toast.makeText(this@MainActivity, "添加图片和视频成功！", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            // 处理 API 错误，例如记录日志
+                            Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
+                } else {
+                    // 处理 API 错误，例如记录日志
+                    Log.e("MyViewModel", "API Error: ${it.message}")
                 }
-            } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "请求失败: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
+
+//        lifecycleScope.launch {
+//
+//            try {
+//                coroutineScope {
+//                    launch {
+//                        Log.w("gyk", "submit: ${uploadFilesPathList}", )
+//
+//                    }
+//
+//                    launch {
+//                        NetworkInstance.submitFeedback(
+//                            feedbackReq
+//                        ).collectLatest {
+//                            if (it.returnCode == 0) {
+//                                // 将 Map 转换为 List<TypeBean>
+//                                Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT)
+//                                    .show()
+//                            } else {
+//                                // 处理 API 错误，例如记录日志
+//                                Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
+//                                    .show()
+//                            }
+//                        }
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                Toast.makeText(this@MainActivity, "请求失败: ${e.message}", Toast.LENGTH_SHORT).show()
+//            }
+//        }
     }
 
 
@@ -510,7 +528,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateImageViews() {
 //        imageUrlList.clear()
-        imageViews?.forEachIndexed { index, imageView ->
+        imageViews.forEachIndexed { index, imageView ->
             if (index < albumUriList.size) {
                 val albumUri = albumUriList[index]
                 deleteImageViews[index]?.visibility = View.VISIBLE
@@ -713,40 +731,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @Throws(IOException::class)
-    private fun createOutputFile(context:Context,fileName: String, isVideo: Boolean): File {
-        // 获取应用的外部文件目录
-//        val storageDir: File = context.cacheDir
-        // 如果目录不存在，则创建它
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        // 根据是否是视频来设置文件后缀
-        val fileExtension = if (isVideo) ".mp4" else ".jpg"
-
-        // 创建临时文件
-        return File.createTempFile(
-            fileName, // 前缀
-            fileExtension, // 后缀
-            storageDir // 目录
-        ).apply {
-            // 设置文件路径
-            Log.w("FileCreation", "Created file at: ${absolutePath}")
-        }
-    }
-
-    private fun createOutputFile(filePath: String): File {
-        val file = File(filePath)
-        // 如果文件目录不存在，则创建它
-        file.parentFile?.let {
-            if (!it.exists()) {
-                it.mkdirs()
-            }
-        }
-        return file.apply {
-            // 设置文件路径
-            Log.w("gykFileCreation", "Created file at: ${absolutePath}")
-        }
-    }
+//    @Throws(IOException::class)
+//    private fun createOutputFile(context:Context,fileName: String, isVideo: Boolean): File {
+//        // 获取应用的外部文件目录
+////        val storageDir: File = context.cacheDir
+//        // 如果目录不存在，则创建它
+//        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+//        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+//        // 根据是否是视频来设置文件后缀
+//        val fileExtension = if (isVideo) ".mp4" else ".jpg"
+//
+//        // 创建临时文件
+//        return File.createTempFile(
+//            fileName, // 前缀
+//            fileExtension, // 后缀
+//            storageDir // 目录
+//        ).apply {
+//            // 设置文件路径
+//            Log.w("FileCreation", "Created file at: ${absolutePath}")
+//        }
+//    }
+//
+//    private fun createOutputFile(filePath: String): File {
+//        val file = File(filePath)
+//        // 如果文件目录不存在，则创建它
+//        file.parentFile?.let {
+//            if (!it.exists()) {
+//                it.mkdirs()
+//            }
+//        }
+//        return file.apply {
+//            // 设置文件路径
+//            Log.w("gykFileCreation", "Created file at: ${absolutePath}")
+//        }
+//    }
 
 
     private fun dismissAlertDialog() {
@@ -830,10 +848,10 @@ class MainActivity : AppCompatActivity() {
                             Log.w("gyk", "compressAndUploadMedia: 压缩失败")
                         }
                     }
-                    if (index == uploadBeanList.size - 1) {
-//                        canUploadFile = true
-                        submit()
-                    }
+//                    if (index == uploadBeanList.size - 1) {
+////                        canUploadFile = true
+//                        submit()
+//                    }
                 } catch (e: Exception) {
                     Log.e("gyk", "compressAndUploadMedia: Error during compression", e)
 //                    return false
@@ -897,42 +915,43 @@ class MainActivity : AppCompatActivity() {
                     albumBean.uri.toString()
                 }
         }
-        val inputFileBeans = inputFilePaths.map {
-            UploadBean(File(it),it.endsWith(".mp4"))
-        }
+//        val inputFileBeans = inputFilePaths.map {
+//            UploadBean(File(it),it.endsWith(".mp4"))
+//        }
         //创建要上传的outputfile
-        Log.w("gyk", "handleMedia:${inputFilePaths} ")
-        val outputFilePaths = inputFilePaths.map { inputFilePath ->
-            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            getExternalFilesDir(null)?.absolutePath + "/compressed_${timestamp}" + File(
-                inputFilePath
-            ).name
-        }
-        outputFilePaths.forEach {
-                outputPath ->
-            val outputFile = File(outputPath)
-            if (!outputFile.exists()) {
-                outputFile.createNewFile()
-            }
-            //TODO判断是否是视频
-            //2.添加进文件队列
-            if (outputPath.endsWith(".mp4")) {
-                val uploadBean = UploadBean(outputFile)
-                uploadBean.isVideo = true
-                this.upLoadBeans.add(uploadBean)
-            } else {
-                this.upLoadBeans.add(UploadBean(outputFile))
-            }
-        }
+//        Log.w("gyk", "handleMedia:${inputFilePaths} ")
+//        val outputFilePaths = inputFilePaths.map { inputFilePath ->
+//            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+//            getExternalFilesDir(null)?.absolutePath + "/compressed_${timestamp}" + File(
+//                inputFilePath
+//            ).name
+//        }
+//        inputFilePaths.forEach {
+//                outputPath ->
+//            val outputFile = File(outputPath)
+//            if (!outputFile.exists()) {
+//                outputFile.createNewFile()
+//            }
+//            //TODO判断是否是视频
+//            //2.添加进文件队列
+//            if (outputPath.endsWith(".mp4")) {
+//                val uploadBean = UploadBean(outputFile)
+//                uploadBean.isVideo = true
+//
+//            } else {
+//                this.upLoadBeans.add(UploadBean(outputFile))
+//            }
+//        }
         inputFilePaths.forEach {
             inputFilePath->
             val inputFile = File(inputFilePath)
-            inputFile.absolutePath
+//            inputFile.absolutePath
+            this.upLoadBeans.add(UploadBean(inputFile))
         }
 
 
-        Log.w("gyk", "outputMedia:${outputFilePaths} ")
-        Log.w("gyk", "outputMedia:${outputFilePaths} ")
+//        Log.w("gyk", "outputMedia:${outputFilePaths} ")
+//        Log.w("gyk", "outputMedia:${outputFilePaths} ")
 //        lifecycleScope.launch {
 //            compressMedia(this@MainActivity,inputFileBeans,upLoadBeans)
 //        }

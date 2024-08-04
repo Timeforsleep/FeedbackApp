@@ -18,10 +18,10 @@ class MainViewModel:ViewModel() {
 
     val feedbackContent:MutableLiveData<String> = MutableLiveData("")
 
-    val relationNumber:MutableLiveData<String> = MutableLiveData("")
+    val relationNumber:MutableLiveData<String> = MutableLiveData()
 
-    val startTime:MutableLiveData<String> =MutableLiveData("0")
+    val startTime:MutableLiveData<String> =MutableLiveData("8")
 
-    val endTime: MutableLiveData<String> = MutableLiveData("24")
+    val endTime: MutableLiveData<String> = MutableLiveData("22")
 
 }
