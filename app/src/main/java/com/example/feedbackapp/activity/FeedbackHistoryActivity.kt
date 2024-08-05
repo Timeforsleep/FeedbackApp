@@ -75,10 +75,23 @@ class FeedbackHistoryActivity : AppCompatActivity() {
                     }
                     // 将 Map 转换为 List<TypeBean>
                     val feedbackHistoryList = it.result
-                    Log.w("gyk", "refreshFeedbackHistory: ${it.result.toString()}", )
-                    feedbackHistoryRV.adapter = feedbackHistoryAdapter
-                    feedbackHistoryRV.layoutManager = LinearLayoutManager(this@FeedbackHistoryActivity,LinearLayoutManager.VERTICAL,false)
-                    feedbackHistoryAdapter.updateFeedbackList(feedbackHistoryList)
+                    if (it.result!=null&&it.result.isNotEmpty()) {
+                        Log.w("gyk", "refreshFeedbackHistory: ${it.result.toString()}")
+                        feedbackHistoryRV.adapter = feedbackHistoryAdapter
+                        feedbackHistoryRV.layoutManager = LinearLayoutManager(
+                            this@FeedbackHistoryActivity,
+                            LinearLayoutManager.VERTICAL,
+                            false
+                        )
+                        feedbackHistoryAdapter.updateFeedbackList(feedbackHistoryList)
+                    } else {
+                        Log.e("MyViewModel", "API Error: ${it.message}")
+                        withContext(Dispatchers.Main){
+                            progressBar.visibility = View.GONE
+                            emptyImageView.visibility = View.VISIBLE
+                            Toast.makeText(this@FeedbackHistoryActivity, "列表为空！", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 } else {
                     swipeRefreshLayout.isRefreshing = false;
                     // 处理 API 错误，例如记录日志

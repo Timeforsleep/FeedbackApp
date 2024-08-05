@@ -344,7 +344,7 @@ class MainActivity : AppCompatActivity() {
                         tagId = mainViewModel.questionSelectedScene.value!!.id.toInt(),
                         tagName = mainViewModel.questionSelectedScene.value!!.typeName,
                         content = mainViewModel.feedbackContent.value!!,
-                        relation = mainViewModel.relationNumber.value,
+                        relation = if (mainViewModel.relationNumber.value!!.isBlank()) null else mainViewModel.relationNumber.value,
                         startTime = mainViewModel.startTime.value!!.toIntOrNull(),
                         endTime = mainViewModel.endTime.value!!.toIntOrNull()
                     )

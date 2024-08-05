@@ -10,6 +10,6 @@ object OkHttpClientInstance {
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
         .connectionPool(ConnectionPool(5,5, TimeUnit.MINUTES))
-//        .dns(HttpDns())//添加okhttpdns
+        .dns(HttpDns())//添加okhttpdns
         .build()
 }
