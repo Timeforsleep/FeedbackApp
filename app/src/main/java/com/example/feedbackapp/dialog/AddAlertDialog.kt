@@ -1,5 +1,6 @@
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ContentValues
@@ -48,6 +49,8 @@ class AddAlertDialog(private val activity: Activity) {
     private var isVideoImageIV2:ImageView?=null
     private var isVideoImageIV3:ImageView?=null
     private var isVideoImageIV4:ImageView?=null
+
+    private var strNumTV: TextView? = null
 
     private var addImageIV1: ImageView? = null
     private var addImageIV2: ImageView? = null
@@ -127,6 +130,7 @@ class AddAlertDialog(private val activity: Activity) {
         }
         builder.show()
     }
+    @SuppressLint("MissingInflatedId")
     fun show() {
         // Inflate the custom layout
         val inflater = LayoutInflater.from(activity)
@@ -135,11 +139,13 @@ class AddAlertDialog(private val activity: Activity) {
         // Find views in the custom layout
         val backIv: ImageView = dialogView.findViewById(R.id.back_iv)
         val textView: TextView = dialogView.findViewById(R.id.textView)
+        strNumTV = dialogView.findViewById(R.id.str_num_textview)
         val addEt: EditText = dialogView.findViewById(R.id.add_et)
         sendTV = dialogView.findViewById(R.id.send_tv)
 
         addEt.doAfterTextChanged{
             feedbackRequest?.content =it.toString()
+            strNumTV?.text = "${it?.length?:0}/300字"
             if (it.isNullOrEmpty()) {
                 sendTV?.setTextColor(Color.parseColor("#DCDCDC"))
                 sendTV?.isClickable = false

@@ -136,6 +136,7 @@ class MainActivity : AppCompatActivity() {
             deleteImageIV4
         )
     }
+    private val strNumTV:TextView by lazy { findViewById(R.id.str_num_textview) }
 
     private val isVideoImageViews by lazy {
         listOf(
@@ -290,6 +291,7 @@ class MainActivity : AppCompatActivity() {
         }
         feedbackET.doAfterTextChanged {
             mainViewModel.feedbackContent.value = it.toString()
+            strNumTV.text = "${it?.length?:0}/300字"
         }
         phoneNumET.doAfterTextChanged {
             mainViewModel.relationNumber.value = it.toString()

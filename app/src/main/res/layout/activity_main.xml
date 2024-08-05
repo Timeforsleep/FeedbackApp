@@ -32,6 +32,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
+        android:paddingBottom="20dp"
         android:layout_height="match_parent">
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -100,6 +101,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/feedback_et_show_tv" />
 
+
+            <TextView
+                android:id="@+id/str_num_textview"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_height="wrap_content"
+                android:text="0/300字"
+                app:layout_constraintEnd_toEndOf="@+id/guide_et"
+                app:layout_constraintTop_toBottomOf="@id/guide_et" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/func_type_cl"
@@ -233,7 +243,10 @@
                 app:layout_constraintEnd_toStartOf="@+id/add_image_fl2"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/guide_et">
+                app:layout_constraintTop_toBottomOf="@+id/str_num_textview"
+                >
+
+<!--                app:layout_constraintTop_toBottomOf="@+id/guide_et"-->
 
 
 
