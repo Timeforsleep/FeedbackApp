@@ -38,6 +38,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.feedbackapp.R
 import com.example.feedbackapp.adapter.QuestionTypeAdapter
 import com.example.feedbackapp.adapter.SimpleGridSpacingItemDecoration
@@ -75,6 +76,8 @@ class MainActivity : AppCompatActivity() {
     //标识是否能上传了
     private var canUploadFile = false
     var addScoreAlertDialog = AddScoreDialog(this)
+
+    private val swipeRefreshLayout by lazy { findViewById<SwipeRefreshLayout>(R.id.swipe_refresh_layout) }
 
     private val checkBox by lazy { findViewById<CheckBox>(R.id.checkbox) }
 
@@ -178,7 +181,9 @@ class MainActivity : AppCompatActivity() {
         val spacingInPixels = CommonUtil.dpToPx(4f, this) // 将dp转换为像素
         val itemDecoration = SimpleGridSpacingItemDecoration(spacingInPixels)
         questionTypeRV.addItemDecoration(itemDecoration)
-
+        swipeRefreshLayout.setOnRefreshListener{
+            getCategory()
+        }
         getCategory()
         //lifedata
         val errorTypeObserver = Observer<Boolean> { isFucError ->
@@ -320,7 +325,7 @@ class MainActivity : AppCompatActivity() {
 //            Log.w("gyk", "submit: 联系方式为空！")
 //        }
         lifecycleScope.launch {
-            if (mainViewModel.questionSelectedScene.value!!.id.toInt() == null) {
+            if (mainViewModel.questionSelectedScene.value == null) {
                 Toast.makeText(this@MainActivity, "无法获取分类id！", Toast.LENGTH_SHORT).show()
                 return@launch
             }
@@ -644,6 +649,7 @@ class MainActivity : AppCompatActivity() {
     private fun getCategory() {
         lifecycleScope.launch {
             Log.w("gyk", "getCategory: 发起网络请求", )
+            swipeRefreshLayout.isRefreshing = true
             NetworkInstance.getProblemScene().collectLatest {
                 if (it.returnCode == 0) {
                     MMKVUtil.putMap(CATEGORY,it.result)
@@ -658,6 +664,7 @@ class MainActivity : AppCompatActivity() {
                     if (typeBeans.isNotEmpty()) {
                         mainViewModel.questionSelectedScene.value = typeBeans[0]
                     }
+                    swipeRefreshLayout.isRefreshing = false
                 } else {
                     Toast.makeText(this@MainActivity, "获取分类错误${it.message},使用缓存", Toast.LENGTH_SHORT).show()
                     // 处理 API 错误，例如记录日志
@@ -673,6 +680,7 @@ class MainActivity : AppCompatActivity() {
                             mainViewModel.questionSelectedScene.value = typeBeans[0]
                         }
                     }
+                    swipeRefreshLayout.isRefreshing = false
                 }
             }
         }
