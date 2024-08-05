@@ -83,7 +83,7 @@ class FeedbackHistoryAdapter(private val activity: Activity) :
                         category = feedback.category,
                         tagId = feedback.tagId,
                         tagName = feedback.tagName,
-                        content = feedback.content,
+                        content = "",
                         relation = null,
                         startTime = null,
                         endTime = null

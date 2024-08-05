@@ -8,7 +8,9 @@ import android.widget.Toast
 import com.example.feedbackapp.R
 import com.example.feedbackapp.activity.MainActivity
 import com.example.feedbackapp.bean.ScoreBean
+import com.example.feedbackapp.common.HAVE_ADD_SCORE
 import com.example.feedbackapp.net.NetworkInstance
+import com.example.feedbackapp.util.MMKVUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -35,13 +37,11 @@ class AddScoreDialog(private val activity: MainActivity) {
         dialog.show()
         var ratingPoint = 2.5
         ratingBar?.setOnRatingBarChangeListener(object : RatingBar.OnRatingBarChangeListener {
-
             override fun onRatingChanged(ratingBar: RatingBar?, rating: Float, fromUser: Boolean) {
                 ratingPoint = rating.toDouble()
             }
         }
         )
-
         cancelTV?.setOnClickListener {
             dialog.dismiss()
         }
@@ -51,7 +51,8 @@ class AddScoreDialog(private val activity: MainActivity) {
                     if (it.returnCode == 0) {
                         // 将 Map 转换为 List<TypeBean>
                         withContext(Dispatchers.Main){
-                            Toast.makeText(activity, "追加描述成功！", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(activity, "评分成功！", Toast.LENGTH_SHORT).show()
+                            MMKVUtil.putBoolean(HAVE_ADD_SCORE, true)
                             dialog.dismiss()
                         }
                     } else {

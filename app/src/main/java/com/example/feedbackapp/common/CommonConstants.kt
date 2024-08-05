@@ -1,6 +1,6 @@
 package com.example.feedbackapp.common
 
-const val BASE_URL = "https://9538691movj6.vicp.fun/api/"
+const val BASE_URL = "http://10.168.162.110:18090/api/"
 
 
 const val EMERGENCY_NORMAL = 0
@@ -20,4 +20,6 @@ const val USER_ID = 18809761
 const val DEVICE_ID = "fuck_you"
 
 const val IS_AGREE_KEY = "isAgree"
+
+const val HAVE_ADD_SCORE = "score"
 

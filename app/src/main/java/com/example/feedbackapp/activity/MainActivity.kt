@@ -48,6 +48,7 @@ import com.example.feedbackapp.common.DEVICE_ID
 import com.example.feedbackapp.common.EMERGENCY_IMPORTANT
 import com.example.feedbackapp.common.EMERGENCY_MOST
 import com.example.feedbackapp.common.EMERGENCY_NORMAL
+import com.example.feedbackapp.common.HAVE_ADD_SCORE
 import com.example.feedbackapp.common.IS_AGREE_KEY
 import com.example.feedbackapp.common.USER_ID
 import com.example.feedbackapp.dialog.AddScoreDialog
@@ -360,7 +361,9 @@ class MainActivity : AppCompatActivity() {
                                 .show()
                         }
                     }
-                    addScoreAlertDialog.show()
+                    if (!MMKVUtil.getBoolean(HAVE_ADD_SCORE)) {
+                        addScoreAlertDialog.show()
+                    }
                 } else {
                     // 处理 API 错误，例如记录日志
                     Log.e("MyViewModel", "API Error: ${it.message}")

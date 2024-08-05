@@ -47,7 +47,7 @@ class WatchPicActivity : AppCompatActivity() {
             photoImageView?.let {
                 Glide.with(this)
                     .load(uri)
-                    .placeholder(R.drawable.add_image)
+                    .placeholder(R.drawable.loading)
                     .into(it)
             }
         }

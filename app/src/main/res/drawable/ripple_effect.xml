@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight"> <!-- 这里指定涟漪的颜色 -->
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="#0056f1" /> <!-- 这里指定mask的颜色，通常是视图的背景色 -->
+            <corners android:radius="8dp" /> <!-- 可选，圆角 -->
+        </shape>
+    </item>
+</ripple>

@@ -38,10 +38,12 @@ class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAda
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         val photoUrl = photosList[position]
         Log.w("gyk", "onBindViewHolder: ${photoUrl}", )
-        holder.photoImageView.setOnClickListener {
-            val intent = Intent(context, WatchPicActivity::class.java)
-            intent.putExtra("photoUrl", photoUrl)
-            context.startActivity(intent)
+        if (!photoUrl.endsWith(".mp4")) {
+            holder.photoImageView.setOnClickListener {
+                val intent = Intent(context, WatchPicActivity::class.java)
+                intent.putExtra("photoUrl", photoUrl)
+                context.startActivity(intent)
+            }
         }
         holder.isVideoIv.setOnClickListener {
             val intent = Intent(context,AgentWebViewActivity::class.java)
@@ -58,7 +60,7 @@ class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAda
         } else {
             Glide.with(context)
                 .load(photoUrl)
-                .placeholder(R.drawable.add_image)
+                .placeholder(R.drawable.loading)
                 .into(holder.photoImageView)
             holder.isVideoIv.visibility = View.GONE
         }
