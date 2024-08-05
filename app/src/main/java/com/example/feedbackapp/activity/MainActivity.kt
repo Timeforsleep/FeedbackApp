@@ -45,6 +45,7 @@ import com.example.feedbackapp.bean.AlbumBean
 import com.example.feedbackapp.bean.FeedbackRequest
 import com.example.feedbackapp.bean.TypeBean
 import com.example.feedbackapp.bean.UploadBean
+import com.example.feedbackapp.common.CATEGORY
 import com.example.feedbackapp.common.DEVICE_ID
 import com.example.feedbackapp.common.EMERGENCY_IMPORTANT
 import com.example.feedbackapp.common.EMERGENCY_MOST
@@ -58,8 +59,10 @@ import com.example.feedbackapp.util.CommonUtil
 import com.example.feedbackapp.util.CommonUtil.getFilePathFromUri
 import com.example.feedbackapp.util.MMKVUtil
 import com.example.feedbackapp.viewmodel.MainViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -313,10 +316,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun submit() {
-        if (mainViewModel.relationNumber.value == null) {
-            Log.w("gyk", "submit: 联系方式为空！")
-        }
+//        if (mainViewModel.relationNumber.value == null) {
+//            Log.w("gyk", "submit: 联系方式为空！")
+//        }
         lifecycleScope.launch {
+            if (mainViewModel.questionSelectedScene.value!!.id.toInt() == null) {
+                Toast.makeText(this@MainActivity, "无法获取分类id！", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
             NetworkInstance.getFeedbackId().collectLatest {
                 progressBar.visibility = View.VISIBLE
                 if (it.returnCode == 0) {
@@ -342,6 +349,9 @@ class MainActivity : AppCompatActivity() {
                     ).collectLatest {
                         if (it.returnCode == 0) {
                             progressBar.visibility = View.GONE
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(this@MainActivity, "添加反馈成功！", Toast.LENGTH_SHORT).show()
+                            }
                             val uploadFilesPathList = upLoadBeans.map { it.file.absolutePath }
                                 NetworkInstance.uploadFiles(feedbackId, uploadFilesPathList)
                                     .collectLatest {
@@ -352,6 +362,7 @@ class MainActivity : AppCompatActivity() {
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         } else {
+                                            progressBar.visibility = View.GONE
                                             // 处理 API 错误，例如记录日志
                                             Toast.makeText(
                                                 this@MainActivity,
@@ -370,6 +381,11 @@ class MainActivity : AppCompatActivity() {
                         addScoreAlertDialog.show()
                     }
                 } else {
+                    progressBar.visibility = View.GONE
+                    withContext(Dispatchers.Main){
+                        Toast.makeText(this@MainActivity, "获取id失败！${it.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                     // 处理 API 错误，例如记录日志
                     Log.e("MyViewModel", "API Error: ${it.message}")
                 }
@@ -627,9 +643,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCategory() {
         lifecycleScope.launch {
+            Log.w("gyk", "getCategory: 发起网络请求", )
             NetworkInstance.getProblemScene().collectLatest {
-//                mainViewModel.typeBeans.value = it.result
                 if (it.returnCode == 0) {
+                    MMKVUtil.putMap(CATEGORY,it.result)
                     // 将 Map 转换为 List<TypeBean>
                     val typeBeans = it.result.map { (id, typeName) ->
                         TypeBean(id, typeName)
@@ -642,8 +659,20 @@ class MainActivity : AppCompatActivity() {
                         mainViewModel.questionSelectedScene.value = typeBeans[0]
                     }
                 } else {
+                    Toast.makeText(this@MainActivity, "获取分类错误${it.message},使用缓存", Toast.LENGTH_SHORT).show()
                     // 处理 API 错误，例如记录日志
                     Log.e("MyViewModel", "API Error: ${it.message}")
+                    if (MMKVUtil.getMap(CATEGORY).isNotEmpty()) {
+                        Log.w("gyk", "getCategory: map${MMKVUtil.getMap(CATEGORY)}", )
+                        val typeBeans = MMKVUtil.getMap(CATEGORY).map { (id, typeName) ->
+                            TypeBean(id.toString(), typeName.toString())
+                        }
+                        questionTypeAdapter.updateTypeBeansList(typeBeans)
+                        mainViewModel.questionSceneList.clear()
+                        if (typeBeans.isNotEmpty()) {
+                            mainViewModel.questionSelectedScene.value = typeBeans[0]
+                        }
+                    }
                 }
             }
         }

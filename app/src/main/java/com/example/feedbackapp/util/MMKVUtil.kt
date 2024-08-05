@@ -1,11 +1,25 @@
 package com.example.feedbackapp.util
 
+import com.google.gson.Gson
 import com.tencent.mmkv.MMKV
 
 object MMKVUtil {
 
     private val mmkv: MMKV by lazy {
         MMKV.defaultMMKV()
+    }
+
+    private val gson = Gson()
+    // 存储Map（序列化为JSON字符串）
+    fun putMap(key: String, map: Map<String, Any?>) {
+        val json = gson.toJson(map)
+        mmkv.encode(key, json)
+    }
+
+    // 读取Map（从JSON字符串反序列化）
+    fun getMap(key: String, defaultValue: Map<String, Any?> = emptyMap()): Map<out Any?, Any?> {
+        val json = mmkv.decodeString(key, null)
+        return json?.let { gson.fromJson(it, Map::class.java) } ?: defaultValue
     }
 
     // 存储字符串

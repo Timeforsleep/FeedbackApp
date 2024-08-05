@@ -11,12 +11,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.retry
+import kotlinx.coroutines.withTimeout
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import java.io.IOException
 
 object NetworkInstance {
 
@@ -30,112 +33,118 @@ object NetworkInstance {
     private val apiService = retrofit.create(ApiService::class.java)
 
     fun getProblemScene(): Flow<ApiResponse<Map<String, String>>> = flow {
-        val response = apiService.getProblemScene()
-        emit(response)
+        withTimeout(5000) {
+            val response = apiService.getProblemScene()
+            emit(response)
+        }
     }.flowOn(Dispatchers.IO)
-//        .retry(retries = 1)
-//        { e ->
-//        // 仅在特定条件下重试，例如网络问题
-//        e is IOException
-//    }
-    .catch { e ->
-        // 处理异常，例如记录日志或发出错误通知
-        Log.e("mini", "Error occurred: ${e.message}" )
-    }
+        .retry(retries = 1) { e ->
+            e is IOException
+        }.catch { e ->
+            Log.e("mini", "Error occurred: ${e.message}")
+            emit(ApiResponse(
+                returnCode = -1,
+                message = "Error occurred: ${e.message}",
+                result = emptyMap()
+            ))
+        }
 
     fun getFeedbackId(): Flow<ApiResponse<Int>> = flow {
-        val response = apiService.getFeedbackId()
-        emit(response)
-    }.flowOn(Dispatchers.IO).catch { e ->
-            // 处理异常，例如记录日志或发出错误通知
-            Log.e("mini", "Error occurred: ${e.message}")
+        withTimeout(5000) {
+            val response = apiService.getFeedbackId()
+            emit(response)
         }
-
+    }.flowOn(Dispatchers.IO)
+        .retry(retries = 1) { e ->
+            e is IOException
+        }.catch { e ->
+            Log.e("mini", "Error occurred: ${e.message}")
+            emit(ApiResponse(
+                returnCode = -1,
+                message = "Error occurred: ${e.message}",
+                result = -1
+            ))
+        }
 
     fun addScore(scoreBean: ScoreBean): Flow<ApiResponse<Int>> = flow {
-        val response = apiService.addScore(scoreBean.userId,scoreBean.score)
-        Log.w("addScore", "addScore: ${scoreBean}")
-        emit(response)
-    }.flowOn(Dispatchers.IO)
-        .catch { e ->
-            // 处理异常，例如记录日志或发出错误通知
-            Log.e("FeedbackViewModel", "Error occurred: ${e.message}")
-            // 这里也可以通过 emit 发送一个错误结果，视需求而定
+        withTimeout(5000) {
+            val response = apiService.addScore(scoreBean.userId, scoreBean.score)
+            Log.w("addScore", "addScore: ${scoreBean}")
+            emit(response)
         }
-
-
+    }.flowOn(Dispatchers.IO)
+        .retry(retries = 1) { e ->
+            e is IOException
+        }.catch { e ->
+            Log.e("FeedbackViewModel", "Error occurred: ${e.message}")
+            emit(ApiResponse(
+                returnCode = -1,
+                message = "Error occurred: ${e.message}",
+                result = -1
+            ))
+        }
 
     fun submitFeedback(feedbackRequest: FeedbackRequest): Flow<ApiResponse<Int>> = flow {
-        val response = apiService.addFeedback(feedbackRequest)
-        Log.w("FeedbackViewModel", "submitFeedback: $response")
-        emit(response)
+        withTimeout(5000) {
+            val response = apiService.addFeedback(feedbackRequest)
+            Log.w("FeedbackViewModel", "submitFeedback: $response")
+            emit(response)
+        }
     }.flowOn(Dispatchers.IO)
-//        .retry(retries = 1) { e ->
-//            // 仅在特定条件下重试，例如网络问题
-//            e is IOException
-//        }
-        .catch { e ->
-            // 处理异常，例如记录日志或发出错误通知
+        .retry(retries = 1) { e ->
+            e is IOException
+        }.catch { e ->
             Log.e("FeedbackViewModel", "Error occurred: ${e.message}")
-            // 这里也可以通过 emit 发送一个错误结果，视需求而定
+            emit(ApiResponse(
+                returnCode = -1,
+                message = "Error occurred: ${e.message}",
+                result = -1
+            ))
         }
 
-    fun getFeedbackHistory(userId:Int): Flow<ApiResponse<List<FeedbackHistoryBean>>> = flow {
-        val response = apiService.getFeedbackHistory(userId)
-        Log.w("FeedbackViewModel", "submitFeedback: $response")
-        emit(response)
+    fun getFeedbackHistory(userId: Int): Flow<ApiResponse<List<FeedbackHistoryBean>>> = flow {
+        withTimeout(5000) {
+            val response = apiService.getFeedbackHistory(userId)
+            Log.w("FeedbackViewModel", "submitFeedback: $response")
+            emit(response)
+        }
     }.flowOn(Dispatchers.IO)
-//        .retry(retries = 1) { e ->
-//            // 仅在特定条件下重试，例如网络问题
-//            e is IOException
-//        }
-        .catch { e ->
-            // 处理异常，例如记录日志或发出错误通知
+        .retry(retries = 1) { e ->
+            e is IOException
+        }.catch { e ->
             Log.e("FeedbackViewModel", "Error occurred: ${e.message}")
-            // 这里也可以通过 emit 发送一个错误结果，视需求而定
+            emit(ApiResponse(
+                returnCode = -1,
+                message = "Error occurred: ${e.message}",
+                result = emptyList()
+            ))
         }
 
-
-//    fun uploadFile(filePath:String): Flow<ApiResponse<Int>> = flow {
-//        val file = File(filePath)
-//        val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
-//        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-//        val response = apiService.uploadFile(body)
-//        emit(response)
-//    }.flowOn(Dispatchers.IO)
-//    .retry(retries = 1) { e ->
-//        // 仅在特定条件下重试，例如网络问题
-//        e is IOException
-//    }
-//    .catch { e ->
-//        // 处理异常，例如记录日志或发出错误通知
-//        Log.e("NetworkInstance", "Error occurred: ${e.message}")
-//        // 可以通过emit发送错误结果，视需求而定
-//    }
-
-    fun uploadFiles(id:Int,filePaths: List<String>): Flow<ApiResponse<Int>> = flow {
-        val parts = filePaths.map { filePath ->
-            Log.w("gyk", "uploadFiles: 调用", )
-            val file = File(filePath)
-            Log.w("gyk", "uploadFiles: 调用1", )
-            if (!file.exists()) {
-                Log.w("gyk", "uploadFiles: 文件为空", )
+    fun uploadFiles(id: Int, filePaths: List<String>): Flow<ApiResponse<Int>> = flow {
+        withTimeout(50000) {
+            val parts = filePaths.map { filePath ->
+                Log.w("gyk", "uploadFiles: 调用")
+                val file = File(filePath)
+                if (!file.exists()) {
+                    Log.w("gyk", "uploadFiles: 文件为空")
+                }
+                val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
+                MultipartBody.Part.createFormData("file", file.name, requestFile)
             }
-            val requestFile = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
-            MultipartBody.Part.createFormData("file", file.name, requestFile)
+            Log.w("gyk", "uploadFiles: 调用2")
+            val response = apiService.uploadFiles(id, parts)
+            emit(response)
         }
-        Log.w("gyk", "uploadFiles: 调用2", )
-        val response = apiService.uploadFiles(id,parts)
-        emit(response)
     }.flowOn(Dispatchers.IO)
-//        .retry(retries = 1) { e ->
-//            // 仅在特定条件下重试，例如网络问题
-//            e is IOException
-//        }
-        .catch { e ->
-            // 处理异常，例如记录日志或发出错误通知
+        .retry(retries = 1) { e ->
+            e is IOException
+        }.catch { e ->
             Log.e("uploadFiles", "Error occurred: ${e.message}")
-            // 可以通过emit发送错误结果，视需求而定
+            emit(ApiResponse(
+                returnCode = -1,
+                message = "Error occurred: ${e.message}",
+                result = -1
+            ))
         }
 
 

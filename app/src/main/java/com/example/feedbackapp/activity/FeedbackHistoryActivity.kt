@@ -30,8 +30,9 @@ class FeedbackHistoryActivity : AppCompatActivity() {
     private val swipeRefreshLayout:SwipeRefreshLayout by lazy { findViewById(R.id.swipe_refresh_layout) }
     private val feedbackHistoryAdapter by lazy { FeedbackHistoryAdapter(this@FeedbackHistoryActivity) }
     var addAlertDialog = AddAlertDialog(this)
+    private val emptyImageView by lazy { findViewById<ImageView>(R.id.empty_imageview) }
 
-    private val progressBar: ProgressBar by lazy { findViewById(R.id.progressBar) }
+    val progressBar: ProgressBar by lazy { findViewById(R.id.progressBar) }
 
     // 对话框消失时的回调
 
@@ -61,15 +62,16 @@ class FeedbackHistoryActivity : AppCompatActivity() {
 //    }
 
     fun refreshFeedbackHistory() {
+        progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
             NetworkInstance.getFeedbackHistory(18809761).collectLatest {
 //                mainViewModel.typeBeans.value = it.result
-                progressBar.visibility = View.VISIBLE
                 if (it.returnCode == 0) {
                     swipeRefreshLayout.isRefreshing = false;
                     withContext(Dispatchers.Main){
                         progressBar.visibility = View.GONE
                         Toast.makeText(this@FeedbackHistoryActivity, "获取反馈历史成功！", Toast.LENGTH_SHORT).show()
+                        emptyImageView.visibility = View.GONE
                     }
                     // 将 Map 转换为 List<TypeBean>
                     val feedbackHistoryList = it.result
@@ -78,10 +80,12 @@ class FeedbackHistoryActivity : AppCompatActivity() {
                     feedbackHistoryRV.layoutManager = LinearLayoutManager(this@FeedbackHistoryActivity,LinearLayoutManager.VERTICAL,false)
                     feedbackHistoryAdapter.updateFeedbackList(feedbackHistoryList)
                 } else {
+                    swipeRefreshLayout.isRefreshing = false;
                     // 处理 API 错误，例如记录日志
                     Log.e("MyViewModel", "API Error: ${it.message}")
                     withContext(Dispatchers.Main){
                         progressBar.visibility = View.GONE
+                        emptyImageView.visibility = View.VISIBLE
                         Toast.makeText(this@FeedbackHistoryActivity, "${it.message}", Toast.LENGTH_SHORT).show()
                     }
                 }

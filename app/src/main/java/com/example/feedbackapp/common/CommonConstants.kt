@@ -23,3 +23,5 @@ const val IS_AGREE_KEY = "isAgree"
 
 const val HAVE_ADD_SCORE = "score"
 
+const val CATEGORY = "category"
+

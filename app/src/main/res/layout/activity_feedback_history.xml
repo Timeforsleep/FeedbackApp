@@ -24,17 +24,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    style="?android:attr/progressBarStyleLarge"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:indeterminate="true"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+
+
+
 
                 <TextView
                     android:id="@+id/feedback_history_tv"
@@ -61,10 +53,10 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/feedback_history_rv"
                     android:layout_width="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
                     android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp"
                     android:layout_marginTop="16dp"
+                    android:layout_marginRight="10dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -76,7 +68,29 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
+    <ImageView
+        android:id="@+id/empty_imageview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:layout_margin="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/empty" />
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 

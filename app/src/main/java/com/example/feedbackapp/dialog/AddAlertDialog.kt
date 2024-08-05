@@ -197,8 +197,9 @@ class AddAlertDialog(private val activity: Activity) {
 
         sendTV?.setOnClickListener {
             if (feedbackRequest != null) {
-                Log.w("gyk", "show: ${feedbackRequest.toString()}", )
-                CoroutineScope(Dispatchers.IO).launch{
+                (activity as FeedbackHistoryActivity).progressBar.visibility = View.VISIBLE
+                Log.w("gyk", "show: ${feedbackRequest.toString()}")
+                CoroutineScope(Dispatchers.IO).launch {
                     NetworkInstance.getFeedbackId().collectLatest {
                         if (it.returnCode == 0) {
                             val feedbackId = it.result//用于上传图片和视频
@@ -206,15 +207,24 @@ class AddAlertDialog(private val activity: Activity) {
                             NetworkInstance.submitFeedback(feedbackRequest!!).collectLatest {
                                 if (it.returnCode == 0) {
                                     // 将 Map 转换为 List<TypeBean>
-                                    withContext(Dispatchers.Main){
-                                        Toast.makeText(activity, "追加描述成功！", Toast.LENGTH_SHORT).show()
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            activity,
+                                            "追加描述成功！",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         dialog.dismiss()
                                         (activity as FeedbackHistoryActivity).refreshFeedbackHistory()
                                     }
                                 } else {
+                                    (activity as FeedbackHistoryActivity).progressBar.visibility = View.GONE
                                     // 处理 API 错误，例如记录日志
-                                    withContext(Dispatchers.Main){
-                                        Toast.makeText(activity, "${it.message}", Toast.LENGTH_SHORT).show()
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            activity,
+                                            "${it.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         dialog.dismiss()
                                         (activity as FeedbackHistoryActivity).refreshFeedbackHistory()
                                     }
@@ -225,7 +235,7 @@ class AddAlertDialog(private val activity: Activity) {
                             NetworkInstance.uploadFiles(feedbackId, uploadFilesPathList)
                                 .collectLatest {
                                     if (it.returnCode == 0) {
-                                        withContext(Dispatchers.Main){
+                                        withContext(Dispatchers.Main) {
                                             Toast.makeText(
                                                 activity,
                                                 "添加图片和视频成功！",
@@ -233,7 +243,8 @@ class AddAlertDialog(private val activity: Activity) {
                                             ).show()
                                         }
                                     } else {
-                                        withContext(Dispatchers.Main){
+                                        (activity as FeedbackHistoryActivity).progressBar.visibility = View.GONE
+                                        withContext(Dispatchers.Main) {
                                             Toast.makeText(
                                                 activity,
                                                 "${it.message}",
@@ -248,6 +259,8 @@ class AddAlertDialog(private val activity: Activity) {
                     }
 
                 }
+            } else {(activity as FeedbackHistoryActivity).progressBar.visibility = View.GONE
+                Toast.makeText(activity, "追加id为空！", Toast.LENGTH_SHORT).show()
             }
             // Handle the send action here
 
