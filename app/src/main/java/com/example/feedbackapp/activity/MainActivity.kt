@@ -369,11 +369,11 @@ class MainActivity : AppCompatActivity() {
                                         } else {
                                             progressBar.visibility = View.GONE
                                             // 处理 API 错误，例如记录日志
-                                            Toast.makeText(
-                                                this@MainActivity,
-                                                "${it.message}",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+//                                            Toast.makeText(
+//                                                this@MainActivity,
+//                                                "${it.message}",
+//                                                Toast.LENGTH_SHORT
+//                                            ).show()
                                         }
                                     }
                         } else {
