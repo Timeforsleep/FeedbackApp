@@ -516,6 +516,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        if (albumUriList.size != 0) {
+            submitTV.isClickable = true
+            submitTV.setBackgroundColor(Color.parseColor("#0056f1"))
+            submitTV.setTextColor(Color.parseColor("#FFFFFF"))
+        }
         showImageNumTV.text = "已添加${albumUriList.size}/4张图片或视频"
     }
 

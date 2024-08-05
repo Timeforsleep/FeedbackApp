@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.feedbackapp.R
 import com.example.feedbackapp.adapter.FeedbackHistoryAdapter
 import com.example.feedbackapp.net.NetworkInstance
@@ -26,6 +27,7 @@ import kotlinx.coroutines.withContext
 class FeedbackHistoryActivity : AppCompatActivity() {
     private val backIV: ImageView by lazy { findViewById(R.id.back_iv) }
     private val feedbackHistoryRV:RecyclerView by lazy { findViewById(R.id.feedback_history_rv) }
+    private val swipeRefreshLayout:SwipeRefreshLayout by lazy { findViewById(R.id.swipe_refresh_layout) }
     private val feedbackHistoryAdapter by lazy { FeedbackHistoryAdapter(this@FeedbackHistoryActivity) }
     var addAlertDialog = AddAlertDialog(this)
 
@@ -49,6 +51,7 @@ class FeedbackHistoryActivity : AppCompatActivity() {
         backIV.setOnClickListener {
             onBackPressed()
         }
+        swipeRefreshLayout.setOnRefreshListener { refreshFeedbackHistory() }
         refreshFeedbackHistory()
     }
 
@@ -63,6 +66,7 @@ class FeedbackHistoryActivity : AppCompatActivity() {
 //                mainViewModel.typeBeans.value = it.result
                 progressBar.visibility = View.VISIBLE
                 if (it.returnCode == 0) {
+                    swipeRefreshLayout.isRefreshing = false;
                     withContext(Dispatchers.Main){
                         progressBar.visibility = View.GONE
                         Toast.makeText(this@FeedbackHistoryActivity, "获取反馈历史成功！", Toast.LENGTH_SHORT).show()

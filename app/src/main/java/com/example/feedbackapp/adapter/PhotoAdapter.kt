@@ -48,6 +48,7 @@ class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAda
         holder.isVideoIv.setOnClickListener {
             val intent = Intent(context,AgentWebViewActivity::class.java)
             intent.putExtra("webUrl",photoUrl)
+            intent.putExtra("isFromFeedbackHistory",true)
             context.startActivity(intent)
         }
         if (photoUrl.endsWith(".mp4")) {

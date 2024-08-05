@@ -1,17 +1,15 @@
 package com.example.feedbackapp.adapter
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.feedbackapp.viewmodel.MainViewModel
 import com.example.feedbackapp.R
 import com.example.feedbackapp.bean.TypeBean
 import com.example.feedbackapp.util.CommonUtil
+import com.example.feedbackapp.viewmodel.MainViewModel
 
 class QuestionTypeAdapter(private val viewModel: MainViewModel):RecyclerView.Adapter<QuestionTypeAdapter.questionTypeViewHolder>() {
     val questionTypeList:MutableList<TypeBean> = mutableListOf()
@@ -19,7 +17,6 @@ class QuestionTypeAdapter(private val viewModel: MainViewModel):RecyclerView.Ada
 
     inner class questionTypeViewHolder(view: View):RecyclerView.ViewHolder(view){
         val questionTypeTxt = view.findViewById<TextView>(R.id.type_tv)
-        val questionTypeIcon = view.findViewById<ImageView>(R.id.type_iv)
     }
 
     @SuppressLint("NotifyDataSetChanged")

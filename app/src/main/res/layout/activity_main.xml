@@ -80,7 +80,7 @@
                 android:layout_marginRight="12dp"
                 android:background="@null"
                 android:gravity="start|top"
-                android:hint="为了更好的帮您解决问题，请在提交问题的同时上传截图信息，方法便我们更快速的帮您解决问题，另外您想要什么功能就在这里描述一下吧！"
+                android:hint="为了更快定位和解决问题，请您详细描述一下，最好上传相关截图~"
                 android:textColorHint="#bec4cf"
                 android:maxLength="300"
                 android:textCursorDrawable="@drawable/cursor"
@@ -100,7 +100,7 @@
                 android:layout_marginRight="12dp"
                 android:background="#EBF4FF"
                 android:padding="8dp"
-                android:translationZ="1dp"
+                android:translationZ="5dp"
                 app:layout_constraintEnd_toStartOf="@+id/guideline"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/question_type_show_tv">
@@ -136,7 +136,7 @@
                 android:layout_marginRight="12dp"
                 android:background="#F0F0F0"
                 android:padding="8dp"
-                android:translationZ="1dp"
+                android:translationZ="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/guideline"
                 app:layout_constraintTop_toTopOf="@+id/func_type_cl">
@@ -215,6 +215,7 @@
                 app:layout_constraintGuide_percent="0.37" />
 
             <FrameLayout
+                android:translationZ="5dp"
                 android:id="@+id/add_image_fl1"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
@@ -252,6 +253,7 @@
             </FrameLayout>
 
             <FrameLayout
+                android:translationZ="5dp"
                 android:id="@+id/add_image_fl2"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
@@ -288,6 +290,7 @@
             </FrameLayout>
 
             <FrameLayout
+                android:translationZ="5dp"
                 android:id="@+id/add_image_fl3"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
@@ -299,6 +302,7 @@
 
 
                 <ImageView
+                    android:translationZ="5dp"
                     android:id="@+id/add_image_iv3"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
@@ -476,6 +480,7 @@
                 android:clickable="false"
                 android:gravity="center"
                 android:text="提交"
+                android:translationZ="5dp"
                 android:textColor="#dee0e6"
                 android:layout_marginBottom="20dp"
                 android:textStyle="bold"
@@ -512,7 +517,7 @@
                 android:padding="8dp"
                 android:gravity="center"
                 android:text="一般"
-                android:translationZ="1dp"
+                android:translationZ="5dp"
                 app:layout_constraintEnd_toStartOf="@+id/important_emergency_tv"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
@@ -527,7 +532,7 @@
                 android:padding="8dp"
                 android:gravity="center"
                 android:text="重要"
-                android:translationZ="1dp"
+                android:translationZ="5dp"
                 app:layout_constraintBottom_toBottomOf="@+id/normal_emergency_tv"
                 app:layout_constraintEnd_toStartOf="@+id/most_emergency_tv"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -543,7 +548,7 @@
                 android:gravity="center"
                 android:padding="8dp"
                 android:text="紧急"
-                android:translationZ="1dp"
+                android:translationZ="5dp"
                 app:layout_constraintBottom_toBottomOf="@+id/important_emergency_tv"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"

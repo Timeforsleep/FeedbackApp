@@ -23,9 +23,18 @@ class AgentWebViewActivity : AppCompatActivity() {
 //            this.finish()
 //        }
         val webUrl = intent.getStringExtra("webUrl")?:""
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, AgentWebFragment(webUrl))
-            .commit()
+        val isFromFeedbackHistory = intent.getBooleanExtra("isFromFeedbackHistory",false)
+        if (webUrl.isNotBlank() && isFromFeedbackHistory) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, AgentWebFragment(webUrl,isFromFeedbackHistory))
+                .commit()
+        }else if (webUrl.isNotBlank() && !isFromFeedbackHistory) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, AgentWebFragment(webUrl))
+                .commit()
+        } else {
+            this.finish()
+        }
     }
 
 }

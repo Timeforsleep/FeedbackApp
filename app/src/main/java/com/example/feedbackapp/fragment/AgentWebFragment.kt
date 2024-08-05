@@ -25,7 +25,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [AgentWebFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class AgentWebFragment(val webUrl:String) : Fragment() {
+class AgentWebFragment(val webUrl:String,var isFromFeedbackHistory:Boolean = false) : Fragment() {
     private lateinit var mAgentWeb: AgentWeb
     private lateinit var backView:ImageView
 
@@ -40,6 +40,9 @@ class AgentWebFragment(val webUrl:String) : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val url = webUrl
+        if (isFromFeedbackHistory) {
+            backView.setImageResource(R.drawable.arrow_back_white)
+        }
         backView.setOnClickListener {
             activity?.finish()
         }
