@@ -22,6 +22,7 @@ import android.view.WindowManager
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -73,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     var addScoreAlertDialog = AddScoreDialog(this)
 
     private val checkBox by lazy { findViewById<CheckBox>(R.id.checkbox) }
+
+    private val progressBar by lazy { findViewById<ProgressBar>(R.id.progressBar) }
 
     private var tempCaptureFilePath: String? = null//拍完照临时的保存地方
     private var tempCaptureUri: Uri? = null//拍完照存在相册的uri
@@ -169,7 +172,7 @@ class MainActivity : AppCompatActivity() {
         checkBox.isChecked = MMKVUtil.getBoolean(IS_AGREE_KEY,false)
         questionTypeRV.adapter = questionTypeAdapter
         questionTypeRV.layoutManager = GridLayoutManager(this, 3)
-        val spacingInPixels = CommonUtil.dpToPx(8f, this) // 将dp转换为像素
+        val spacingInPixels = CommonUtil.dpToPx(4f, this) // 将dp转换为像素
         val itemDecoration = SimpleGridSpacingItemDecoration(spacingInPixels)
         questionTypeRV.addItemDecoration(itemDecoration)
 
@@ -315,8 +318,8 @@ class MainActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             NetworkInstance.getFeedbackId().collectLatest {
+                progressBar.visibility = View.VISIBLE
                 if (it.returnCode == 0) {
-                    Toast.makeText(this@MainActivity, "获取id成功", Toast.LENGTH_SHORT).show()
                     val feedbackId = it.result
                     val feedbackReq = FeedbackRequest(
                         id = feedbackId,
@@ -338,6 +341,7 @@ class MainActivity : AppCompatActivity() {
                         feedbackReq
                     ).collectLatest {
                         if (it.returnCode == 0) {
+                            progressBar.visibility = View.GONE
                             val uploadFilesPathList = upLoadBeans.map { it.file.absolutePath }
                                 NetworkInstance.uploadFiles(feedbackId, uploadFilesPathList)
                                     .collectLatest {
@@ -357,6 +361,7 @@ class MainActivity : AppCompatActivity() {
                                         }
                                     }
                         } else {
+                            progressBar.visibility = View.GONE
                             Toast.makeText(this@MainActivity, "${it.message}", Toast.LENGTH_SHORT)
                                 .show()
                         }
@@ -511,7 +516,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        showImageNumTV.text = "已添加${albumUriList.size}/4张图片"
+        showImageNumTV.text = "已添加${albumUriList.size}/4张图片或视频"
     }
 
     // 获取视频和图片文件的实际路径

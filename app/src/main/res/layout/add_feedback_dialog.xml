@@ -207,7 +207,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="已添加0/4张图片"
+        android:text="已添加0/4张图片或视频"
         android:textColor="#718398"
         android:textSize="8dp"
         app:layout_constraintStart_toStartOf="@+id/add_image_fl1"

@@ -320,7 +320,7 @@ class AddAlertDialog(private val activity: Activity) {
                 }
             }
         }
-        showImageNumTV?.text = "已添加${albumUriList.size}/4张图片"
+        showImageNumTV?.text = "已添加${albumUriList.size}/4张图片或视频"
         if (albumUriList.isNotEmpty()) {
             sendTV?.setTextColor(Color.parseColor("#0056f1"))
             sendTV?.isClickable = true
