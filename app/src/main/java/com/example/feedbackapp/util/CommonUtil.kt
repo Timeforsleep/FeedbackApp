@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Base64
 import android.view.View
 import android.widget.ImageView
@@ -177,6 +178,21 @@ object CommonUtil {
         throw IllegalArgumentException("Invalid URI")
     }
 
+
+    fun isImageOrVideoSizeValid(uri: Uri,sizeMB:Int,contentResolver:ContentResolver): Boolean {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        var sizeValid = false
+        cursor?.use {
+            val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+            if (it.moveToFirst()) {
+                val size = it.getLong(sizeIndex)
+                if (size <= sizeMB * 1024 * 1024) { // 5MB
+                    sizeValid = true
+                }
+            }
+        }
+        return sizeValid
+    }
 
 
 }

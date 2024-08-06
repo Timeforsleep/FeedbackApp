@@ -442,24 +442,38 @@ class MainActivity : AppCompatActivity() {
     @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if ((requestCode == REQUEST_PICK_IMAGE) && resultCode == RESULT_OK) {
-            data?.data?.let { selectedImageUri ->
-                if (albumUriList.size < 4) {
+        if ((requestCode == REQUEST_PICK_IMAGE) && resultCode == RESULT_OK&&data!=null) {
+            val clipData = data.clipData
+            val imageUris = mutableListOf<Uri>()
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    if (imageUris.size + albumUriList.size >= 4) {
+                        Toast.makeText(this, "最多只能选择4张图片或视频", Toast.LENGTH_SHORT).show()
+                        break
+                    }
+                    val imageUri = clipData.getItemAt(i).uri
+                    if (CommonUtil.isImageOrVideoSizeValid(imageUri,5,contentResolver)) {
+                        imageUris.add(imageUri)
+                    } else {
+                        Toast.makeText(this, "选择的图片单张不能超过5MB", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                imageUris.forEach {selectedImageUri->
+                    if (albumUriList.size < 4) {
                     albumUriList.add(AlbumBean(selectedImageUri))
                     updateImageViews()
                 }
+                }
             }
+//            data?.data?.let { selectedImageUri ->
+//                if (albumUriList.size < 4) {
+//                    albumUriList.add(AlbumBean(selectedImageUri))
+//                    updateImageViews()
+//                }
+//            }
         }
         if ((requestCode == REQUEST_IMAGE_CAPTURE) && resultCode == RESULT_OK) {
-            Log.w("gyk", "onActivityResult: 拍完照了", )
-//            if (albumUriList.size < 4) {
-////                val file = currentPhotoPath?.let { File(it) }
-////                val uri = Uri.fromFile(file)
-//                val albumBean = AlbumBean(uri)
-//                albumBean.isFromCapture = true
-//                albumUriList.add(albumBean)
-//                updateImageViews()
-//            }
+            Log.w("gyk", "onActivityResult: 拍完照了")
             tempCaptureUri?.let { selectedVideoUri ->
                 if (albumUriList.size < 4) {
                     val albumBean = AlbumBean(selectedVideoUri)
@@ -469,7 +483,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        if ((requestCode == REQUEST_PICK_VIDEO) && resultCode == RESULT_OK) {
+        if ((requestCode == REQUEST_PICK_VIDEO) && resultCode == RESULT_OK&&data!=null) {
             data?.data?.let { selectedVideoUri ->
                 if (albumUriList.size < 4) {
                     val albumBean = AlbumBean(selectedVideoUri)
@@ -478,9 +492,34 @@ class MainActivity : AppCompatActivity() {
                     updateImageViews()
                 }
             }
+            val clipData = data.clipData
+            val videoUris = mutableListOf<Uri>()
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    if (videoUris.size + albumUriList.size>=4) {
+                        Toast.makeText(this, "最多只能选择4张图片或视频", Toast.LENGTH_SHORT).show()
+                        break
+                    }
+                    val imageUri = clipData.getItemAt(i).uri
+                    if (CommonUtil.isImageOrVideoSizeValid(imageUri,10,contentResolver)) {
+                        videoUris.add(imageUri)
+                    } else {
+                        Toast.makeText(this, "选择的视频单个不能超过10MB", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                videoUris.forEach { selectedImageUri->
+                    if (albumUriList.size < 4) {
+                        val albumBean = AlbumBean(selectedImageUri)
+                        albumBean.isVideo = true
+                        albumUriList.add(albumBean)
+                        updateImageViews()
+                    }
+                }
+            }
         }
         dismissAlertDialog()
     }
+
 
     private fun deleteImage(index: Int) {
         if (index in albumUriList.indices) {
@@ -520,7 +559,7 @@ class MainActivity : AppCompatActivity() {
 
                     // 关闭输入流
 //                    inputStream!!.close()
-                    Log.w("gykuri", "updateImageViews: ${albumUri.uri}", )
+                    Log.w("gykuri", "updateImageViews: ${albumUri.uri}")
                     // 显示Bitmap到ImageView
                     imageView.setImageURI(albumUri.uri)
                     imageView.setOnClickListener {
@@ -652,7 +691,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCategory() {
         lifecycleScope.launch {
-            Log.w("gyk", "getCategory: 发起网络请求", )
+            Log.w("gyk", "getCategory: 发起网络请求")
             swipeRefreshLayout.isRefreshing = true
             NetworkInstance.getProblemScene().collectLatest {
                 if (it.returnCode == 0) {
@@ -661,7 +700,7 @@ class MainActivity : AppCompatActivity() {
                     val typeBeans = it.result.map { (id, typeName) ->
                         TypeBean(id, typeName)
                     }
-                    Log.w("gyk类别", "getCategory: ${typeBeans}", )
+                    Log.w("gyk类别", "getCategory: ${typeBeans}")
                     questionTypeAdapter.updateTypeBeansList(typeBeans)
                     mainViewModel.questionSceneList.clear()
                     mainViewModel.questionSceneList.addAll(typeBeans.toMutableList())
@@ -674,7 +713,7 @@ class MainActivity : AppCompatActivity() {
                     // 处理 API 错误，例如记录日志
                     Log.e("MyViewModel", "API Error: ${it.message}")
                     if (MMKVUtil.getMap(CATEGORY).isNotEmpty()) {
-                        Log.w("gyk", "getCategory: map${MMKVUtil.getMap(CATEGORY)}", )
+                        Log.w("gyk", "getCategory: map${MMKVUtil.getMap(CATEGORY)}")
                         val typeBeans = MMKVUtil.getMap(CATEGORY).map { (id, typeName) ->
                             TypeBean(id.toString(), typeName.toString())
                         }
@@ -728,15 +767,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun chooseVideo(openVideoCode: Int) {
-        val intent = Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        );
-        startActivityForResult(intent, openVideoCode);
+//        val intent = Intent(
+//            Intent.ACTION_PICK,
+//            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+//        );
+//        startActivityForResult(intent, openVideoCode);
+        val intent = Intent(Intent.ACTION_GET_CONTENT, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "video/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        startActivityForResult(intent, openVideoCode)
     }
 
     private fun chooseImage(openImageCode: Int) {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val intent = Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         startActivityForResult(intent, openImageCode)
     }
 

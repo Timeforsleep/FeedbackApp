@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "com.example.feedbackapp"
         minSdk 25
-        targetSdk 33
+        targetSdk 32
         versionCode 1
         versionName "1.0"
         proguardFiles getDefaultProguardFile(
@@ -65,4 +65,5 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer:2.18.4'
     implementation 'io.github.justson:agentweb-core:v5.1.1-androidx'
     implementation 'com.tencent:mmkv:1.2.13'
+
 }

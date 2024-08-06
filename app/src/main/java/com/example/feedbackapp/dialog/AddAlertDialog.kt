@@ -89,11 +89,10 @@ class AddAlertDialog(private val activity: Activity) {
     }
 
     private fun chooseVideo(openVideoCode: Int) {
-        val intent = Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        );
-        activity.startActivityForResult(intent, openVideoCode);
+        val intent = Intent(Intent.ACTION_GET_CONTENT, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "video/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        activity.startActivityForResult(intent, openVideoCode)
     }
 
     private fun openVideoPicker() {
@@ -350,7 +349,9 @@ class AddAlertDialog(private val activity: Activity) {
     }
 
     private fun chooseImage(openImageCode: Int) {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val intent = Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         activity.startActivityForResult(intent, openImageCode)
     }
 
@@ -388,14 +389,37 @@ class AddAlertDialog(private val activity: Activity) {
     }
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_IMAGE_PICK_ADD && resultCode == Activity.RESULT_OK) {
-            val imageUri: Uri? = data?.data
-            imageUri?.let {
-                if (albumUriList.size < 4) {
-                    albumUriList.add(AlbumBean(it))
-                    updateImageViews()
+        if (requestCode == REQUEST_IMAGE_PICK_ADD && resultCode == Activity.RESULT_OK&&data!=null) {
+            val clipData = data.clipData
+            val imageUris = mutableListOf<Uri>()
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    if (imageUris.size + albumUriList.size >= 4) {
+                        Toast.makeText(activity, "最多只能选择4张图片或视频", Toast.LENGTH_SHORT).show()
+                        break
+                    }
+                    val imageUri = clipData.getItemAt(i).uri
+                    if (CommonUtil.isImageOrVideoSizeValid(imageUri,5,activity.contentResolver)) {
+                        imageUris.add(imageUri)
+                    } else {
+                        Toast.makeText(activity, "选择的图片单张不能超过5MB", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                imageUris.forEach {selectedImageUri->
+                    if (albumUriList.size < 4) {
+                        albumUriList.add(AlbumBean(selectedImageUri))
+                        updateImageViews()
+                    }
                 }
             }
+
+//            val imageUri: Uri? = data?.data
+//            imageUri?.let {
+//                if (albumUriList.size < 4) {
+//                    albumUriList.add(AlbumBean(it))
+//                    updateImageViews()
+//                }
+//            }
         }
         if (requestCode == REQUEST_IMAGE_CAPTURE_ADD && resultCode == Activity.RESULT_OK){
             tempCaptureUri?.let { selectedVideoUri ->
@@ -407,13 +431,37 @@ class AddAlertDialog(private val activity: Activity) {
                 }
             }
         }
-        if ((requestCode == REQUEST_PICK_VIDEO_ADD) && resultCode == AppCompatActivity.RESULT_OK) {
-            data?.data?.let { selectedVideoUri ->
-                if (albumUriList.size < 4) {
-                    val albumBean = AlbumBean(selectedVideoUri)
-                    albumBean.isVideo = true
-                    albumUriList.add(albumBean)
-                    updateImageViews()
+        if ((requestCode == REQUEST_PICK_VIDEO_ADD) && resultCode == AppCompatActivity.RESULT_OK&&data!=null) {
+//            data?.data?.let { selectedVideoUri ->
+//                if (albumUriList.size < 4) {
+//                    val albumBean = AlbumBean(selectedVideoUri)
+//                    albumBean.isVideo = true
+//                    albumUriList.add(albumBean)
+//                    updateImageViews()
+//                }
+//            }
+            val clipData = data.clipData
+            val videoUris = mutableListOf<Uri>()
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    if (videoUris.size + albumUriList.size>=4) {
+                        Toast.makeText(activity, "最多只能选择4张图片或视频", Toast.LENGTH_SHORT).show()
+                        break
+                    }
+                    val imageUri = clipData.getItemAt(i).uri
+                    if (CommonUtil.isImageOrVideoSizeValid(imageUri,10,activity.contentResolver)) {
+                        videoUris.add(imageUri)
+                    } else {
+                        Toast.makeText(activity, "选择的视频单个不能超过10MB", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                videoUris.forEach { selectedImageUri->
+                    if (albumUriList.size < 4) {
+                        val albumBean = AlbumBean(selectedImageUri)
+                        albumBean.isVideo = true
+                        albumUriList.add(albumBean)
+                        updateImageViews()
+                    }
                 }
             }
         }
