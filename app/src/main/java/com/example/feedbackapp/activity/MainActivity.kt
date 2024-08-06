@@ -59,6 +59,7 @@ import com.example.feedbackapp.net.NetworkInstance
 import com.example.feedbackapp.util.CommonUtil
 import com.example.feedbackapp.util.CommonUtil.getFilePathFromUri
 import com.example.feedbackapp.util.MMKVUtil
+import com.example.feedbackapp.util.ScreenUtil
 import com.example.feedbackapp.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -76,7 +77,7 @@ class MainActivity : AppCompatActivity() {
 //    private val button: Button by lazy { findViewById(R.id.button) }
     //标识是否能上传了
     private var canUploadFile = false
-    var addScoreAlertDialog = AddScoreDialog(this)
+    private var addScoreAlertDialog:AddScoreDialog ?= null
 
     private val swipeRefreshLayout by lazy { findViewById<SwipeRefreshLayout>(R.id.swipe_refresh_layout) }
 
@@ -386,7 +387,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     if (!MMKVUtil.getBoolean(HAVE_ADD_SCORE)) {
-                        addScoreAlertDialog.show()
+                        addScoreAlertDialog?.show()
                     }
                 } else {
                     progressBar.visibility = View.GONE
@@ -620,7 +621,7 @@ class MainActivity : AppCompatActivity() {
         alertDialog = AlertDialog.Builder(context)
             .setView(dialogView)
             .create()
-
+        addScoreAlertDialog = AddScoreDialog(this)
 
         // 设置点击事件
         takePhotoTV.setOnClickListener {
@@ -791,6 +792,9 @@ class MainActivity : AppCompatActivity() {
     fun handleAndUploadMedia(list: MutableList<AlbumBean>) {
         Log.w("gykkk", "handleMedia: ${list}")
         this@MainActivity.upLoadBeans.clear()
+        // 获取屏幕宽高
+        val screenWidth = ScreenUtil.getWindowWidth(this)
+        val screenHeight = ScreenUtil.getWindowHeight(this)
         val inputFilePaths =
             list.map { albumBean ->
 //                if (!albumBean.isFromCapture) {
@@ -802,6 +806,12 @@ class MainActivity : AppCompatActivity() {
         inputFilePaths.forEach {
             inputFilePath->
             val inputFile = File(inputFilePath)
+//            if (!inputFilePath.endsWith(".mp4")) {
+//                val compressedFile = CommonUtil.compressImage(inputFile, screenWidth, screenHeight)
+//                this@MainActivity.upLoadBeans.add(UploadBean(compressedFile))
+//            } else {
+//                this@MainActivity.upLoadBeans.add(UploadBean(inputFile))
+//            }
 //            if (!inputFile.exists()) {
 //                inputFile.createNewFile()
 //            }
@@ -830,6 +840,12 @@ class MainActivity : AppCompatActivity() {
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = image.absolutePath
         return image
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        alertDialog = null
+        addScoreAlertDialog = null
     }
 
 

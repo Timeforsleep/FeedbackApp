@@ -18,6 +18,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import kotlin.math.roundToInt
 
@@ -106,25 +107,6 @@ object CommonUtil {
         return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-        // Raw height and width of image
-        val (height: Int, width: Int) = options.outHeight to options.outWidth
-
-        var inSampleSize = 1
-
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-
-        return inSampleSize
-    }
 
 //    fun createImageUri(context: Context): Uri? {
 //        val file = try {
@@ -192,6 +174,41 @@ object CommonUtil {
             }
         }
         return sizeValid
+    }
+
+    fun compressImage(file: File, targetWidth: Int, targetHeight: Int): File {
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+
+        BitmapFactory.decodeFile(file.absolutePath, options)
+
+        options.inSampleSize = calculateInSampleSize(options, targetWidth, targetHeight)
+        options.inJustDecodeBounds = false
+
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath, options)
+        val compressedFile = File(file.parent, "compressed_${file.name}")
+        FileOutputStream(compressedFile).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+        }
+
+        return compressedFile
+    }
+
+    fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val (height: Int, width: Int) = options.outHeight to options.outWidth
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
     }
 
 

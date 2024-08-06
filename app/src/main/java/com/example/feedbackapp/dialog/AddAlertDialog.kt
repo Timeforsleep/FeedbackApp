@@ -196,6 +196,12 @@ class AddAlertDialog(private val activity: Activity) {
                 }
             inputFilePaths.forEach { inputFilePath ->
                 val inputFile = File(inputFilePath)
+//                if (!inputFilePath.endsWith(".mp4")) {
+//                    val compressedFile = CommonUtil.compressImage(inputFile, ScreenUtil.getWindowWidth(activity), ScreenUtil.getWindowHeight(activity))
+//                    this.upLoadBeans.add(UploadBean(compressedFile))
+//                } else {
+//                    this.upLoadBeans.add(UploadBean(inputFile))
+//                }
                 this.upLoadBeans.add(UploadBean(inputFile))
             }
         }
