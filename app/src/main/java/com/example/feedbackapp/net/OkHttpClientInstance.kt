@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit
 
 object OkHttpClientInstance {
     val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(15, TimeUnit.SECONDS)
-        .writeTimeout(15, TimeUnit.SECONDS)
+        .connectTimeout(50, TimeUnit.SECONDS)
+        .readTimeout(50, TimeUnit.SECONDS)
+        .writeTimeout(50, TimeUnit.SECONDS)
         .connectionPool(ConnectionPool(5,5, TimeUnit.MINUTES))
         .dns(HttpDns())//添加okhttpdns
         .build()

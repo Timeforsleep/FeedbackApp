@@ -70,6 +70,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     private var currentPhotoPath: String? = null
 //    private val button: Button by lazy { findViewById(R.id.button) }
@@ -273,7 +274,7 @@ class MainActivity : AppCompatActivity() {
         productCL.setOnClickListener {
             mainViewModel.isFucError.value = false
         }
-        imageViews.forEachIndexed { index, imageView ->
+        imageViews.forEachIndexed { _, imageView ->
             imageView.setOnClickListener { showCustomDialog(this) }
         }
 
@@ -438,6 +439,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if ((requestCode == REQUEST_PICK_IMAGE) && resultCode == RESULT_OK) {
@@ -709,9 +711,12 @@ class MainActivity : AppCompatActivity() {
                         put(MediaStore.Images.Media.DATA, tempCaptureFilePath)
                     }
                 }
-                tempCaptureUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempCaptureUri)
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                tempCaptureUri = contentResolver.insert(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    contentValues
+                )
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempCaptureUri)
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
             }
         }
     }

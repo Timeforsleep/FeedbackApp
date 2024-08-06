@@ -250,13 +250,13 @@ class AddAlertDialog(private val activity: Activity) {
                                         }
                                     } else {
                                         (activity as FeedbackHistoryActivity).progressBar.visibility = View.GONE
-                                        withContext(Dispatchers.Main) {
-                                            Toast.makeText(
-                                                activity,
-                                                "${it.message}",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+//                                        withContext(Dispatchers.Main) {
+//                                            Toast.makeText(
+//                                                activity,
+//                                                "${it.message}",
+//                                                Toast.LENGTH_SHORT
+//                                            ).show()
+//                                        }
                                         // 处理 API 错误，例如记录日志
                                     }
                                 }
