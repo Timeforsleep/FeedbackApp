@@ -1,8 +1,10 @@
 package com.example.feedbackapp.activity
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -15,7 +17,9 @@ import com.google.android.exoplayer2.ui.PlayerView
 class PlayVideoActivity : AppCompatActivity() {
     private lateinit var playerView: PlayerView
     private lateinit var player: ExoPlayer
+    private lateinit var cancelIV:ImageView
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -28,6 +32,10 @@ class PlayVideoActivity : AppCompatActivity() {
         playerView = findViewById(R.id.playerView)
         player = ExoPlayer.Builder(this).build()
         playerView.player = player
+        cancelIV = findViewById(R.id.cancel_tv)
+        cancelIV.setOnClickListener {
+            this.finish()
+        }
         val videoFilePath = intent.getStringExtra("videoFilePath")
         videoFilePath?.let { playVideo(it) }
     }

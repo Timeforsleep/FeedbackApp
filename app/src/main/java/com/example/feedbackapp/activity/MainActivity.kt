@@ -538,6 +538,7 @@ class MainActivity : AppCompatActivity() {
                 if (albumUri.isVideo) {
                     isVideoImageViews[index]?.visibility = View.VISIBLE
                     getRealPathFromURI(albumUri.uri)?.let { path ->
+                        Log.w("gykuri", "updateImageViews: ${albumUri.uri}", )
                         val thumbnail = ThumbnailUtils.createVideoThumbnail(
                             path,
                             MediaStore.Images.Thumbnails.MINI_KIND
@@ -545,8 +546,8 @@ class MainActivity : AppCompatActivity() {
                         imageView.setImageBitmap(thumbnail)
                         //覆盖点击事件
                         imageView.setOnClickListener {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.setDataAndType(albumUri.uri, "video/*")
+                            val intent = Intent(this,PlayVideoActivity::class.java)
+                            intent.putExtra("videoFilePath",path)
                             startActivity(intent)
                         }
                     }

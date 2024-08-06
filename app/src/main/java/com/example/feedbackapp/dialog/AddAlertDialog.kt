@@ -27,6 +27,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.example.feedbackapp.R
 import com.example.feedbackapp.activity.FeedbackHistoryActivity
 import com.example.feedbackapp.activity.MainActivity
+import com.example.feedbackapp.activity.PlayVideoActivity
 import com.example.feedbackapp.activity.WatchPicActivity
 import com.example.feedbackapp.bean.AlbumBean
 import com.example.feedbackapp.bean.FeedbackRequest
@@ -311,8 +312,8 @@ class AddAlertDialog(private val activity: Activity) {
                         imageView?.setImageBitmap(thumbnail)
                         //覆盖点击事件
                         imageView?.setOnClickListener {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.setDataAndType(albumUri.uri, "video/*")
+                            val intent = Intent(activity, PlayVideoActivity::class.java)
+                            intent.putExtra("videoFilePath",path)
                             activity.startActivity(intent)
                         }
                     }
