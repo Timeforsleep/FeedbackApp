@@ -119,6 +119,26 @@
     @androidx.lifecycle.OnLifecycleEvent *;
 }
 
+# 防止友盟混淆
+-keep class com.umeng.** {*;}
+
+-keep class org.repackage.** {*;}
+
+-keep class com.uyumao.** { *; }
+
+-keepclassmembers class * {
+   public <init> (org.json.JSONObject);
+}
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-keep public class com.example.feedbackapp.R$*{
+public static final int *;
+}
+
 
 
 

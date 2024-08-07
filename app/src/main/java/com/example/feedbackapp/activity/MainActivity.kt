@@ -32,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
@@ -60,8 +61,13 @@ import com.example.feedbackapp.util.CommonUtil
 import com.example.feedbackapp.util.CommonUtil.getFilePathFromUri
 import com.example.feedbackapp.util.CommonUtil.setOnSingleClickListener
 import com.example.feedbackapp.util.MMKVUtil
+import com.example.feedbackapp.util.NetworkStatusMonitor
 import com.example.feedbackapp.util.ScreenUtil
 import com.example.feedbackapp.viewmodel.MainViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
+import com.google.firebase.analytics.logEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -74,7 +80,7 @@ import java.util.Date
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
-
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     private var currentPhotoPath: String? = null
 //    private val button: Button by lazy { findViewById(R.id.button) }
@@ -171,6 +177,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        firebaseAnalytics = Firebase.analytics
 //        getFeedbackId()
 //        ActivityCompat.requestPermissions(
 //            this@MainActivity,
@@ -250,7 +257,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
+        observeNetworkChanges()
         mainViewModel.isFucError.observe(this, errorTypeObserver)
         mainViewModel.questionType.observe(this, emergencyTypeObserver)
         mainViewModel.feedbackContent.observe(this, contentObserver)
@@ -258,6 +265,14 @@ class MainActivity : AppCompatActivity() {
         mainViewModel.relationNumber.observe(this, relationNumberObserver)
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        firebaseAnalytics.logEvent("主页面成功启动") {
+            bundleOf(Pair("userId", USER_ID))
+            bundleOf(Pair("deviceId", DEVICE_ID))
+        }
+    }
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -728,6 +743,19 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     swipeRefreshLayout.isRefreshing = false
+                }
+            }
+        }
+    }
+
+    private fun observeNetworkChanges() {
+        lifecycleScope.launch {
+            NetworkStatusMonitor.isConnected.collectLatest { isConnected ->
+                if (isConnected) {
+                    Toast.makeText(this@MainActivity, "Network Connected", Toast.LENGTH_SHORT).show()
+                    getCategory()
+                } else {
+                    Toast.makeText(this@MainActivity, "Network Disconnected", Toast.LENGTH_SHORT).show()
                 }
             }
         }

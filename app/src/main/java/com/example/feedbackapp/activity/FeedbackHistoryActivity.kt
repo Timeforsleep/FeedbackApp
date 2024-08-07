@@ -19,6 +19,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.feedbackapp.R
 import com.example.feedbackapp.adapter.FeedbackHistoryAdapter
 import com.example.feedbackapp.net.NetworkInstance
+import com.example.feedbackapp.util.NetworkStatusMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -54,6 +55,20 @@ class FeedbackHistoryActivity : AppCompatActivity() {
         }
         swipeRefreshLayout.setOnRefreshListener { refreshFeedbackHistory() }
         refreshFeedbackHistory()
+        observeNetworkChanges()
+    }
+
+    private fun observeNetworkChanges() {
+        lifecycleScope.launch {
+            NetworkStatusMonitor.isConnected.collectLatest { isConnected ->
+                if (isConnected) {
+                    Toast.makeText(this@FeedbackHistoryActivity, "Network Connected", Toast.LENGTH_SHORT).show()
+                    refreshFeedbackHistory()
+                } else {
+                    Toast.makeText(this@FeedbackHistoryActivity, "Network Disconnected", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
 //    override fun onResume() {
