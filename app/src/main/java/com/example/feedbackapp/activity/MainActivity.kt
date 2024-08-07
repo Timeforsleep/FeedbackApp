@@ -58,6 +58,7 @@ import com.example.feedbackapp.dialog.AddScoreDialog
 import com.example.feedbackapp.net.NetworkInstance
 import com.example.feedbackapp.util.CommonUtil
 import com.example.feedbackapp.util.CommonUtil.getFilePathFromUri
+import com.example.feedbackapp.util.CommonUtil.setOnSingleClickListener
 import com.example.feedbackapp.util.MMKVUtil
 import com.example.feedbackapp.util.ScreenUtil
 import com.example.feedbackapp.viewmodel.MainViewModel
@@ -73,6 +74,8 @@ import java.util.Date
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
+
+
     private var currentPhotoPath: String? = null
 //    private val button: Button by lazy { findViewById(R.id.button) }
     //标识是否能上传了
@@ -310,11 +313,10 @@ class MainActivity : AppCompatActivity() {
         backIV.setOnClickListener {
             onBackPressed()
         }
-        submitTV.setOnClickListener {
-            Log.w("gyk", "setupListeners: ")
+        submitTV.setOnSingleClickListener {
             if (!MMKVUtil.getBoolean(IS_AGREE_KEY)) {
                 Toast.makeText(this, "还没同意隐私政策和保护声明", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                return@setOnSingleClickListener
             }
             handleAndUploadMedia(albumUriList)
         }
@@ -859,6 +861,9 @@ class MainActivity : AppCompatActivity() {
         const val STORAGE_REQUEST_CODE = 1001
 
     }
+
+    // 扩展函数，用于防止View在短时间内被重复点击
+
 
 }
 

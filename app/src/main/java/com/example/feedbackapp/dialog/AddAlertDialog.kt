@@ -34,6 +34,7 @@ import com.example.feedbackapp.bean.FeedbackRequest
 import com.example.feedbackapp.bean.UploadBean
 import com.example.feedbackapp.net.NetworkInstance
 import com.example.feedbackapp.util.CommonUtil
+import com.example.feedbackapp.util.CommonUtil.setOnSingleClickListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -207,7 +208,7 @@ class AddAlertDialog(private val activity: Activity) {
         }
 
 
-        sendTV?.setOnClickListener {
+        sendTV?.setOnSingleClickListener() {
             if (feedbackRequest != null) {
                 (activity as FeedbackHistoryActivity).progressBar.visibility = View.VISIBLE
                 Log.w("gyk", "show: ${feedbackRequest.toString()}")

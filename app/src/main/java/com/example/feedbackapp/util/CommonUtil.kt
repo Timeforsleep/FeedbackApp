@@ -211,5 +211,17 @@ object CommonUtil {
         return inSampleSize
     }
 
+    fun View.setOnSingleClickListener(interval: Long = 1000L, action: () -> Unit) {
+        var lastClickTime = 0L
+
+        setOnClickListener {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastClickTime >= interval) {
+                action() // 执行点击动作
+                lastClickTime = currentTime // 更新最后一次点击时间
+            }
+        }
+    }
+
 
 }
