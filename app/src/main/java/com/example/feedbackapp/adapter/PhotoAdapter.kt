@@ -50,6 +50,8 @@ class PhotoAdapter(private val context: Context) : RecyclerView.Adapter<PhotoAda
             holder.photoImageView.setOnClickListener {
                 val intent = Intent(context, WatchPicActivity::class.java)
                 intent.putExtra("photoUrl", photoUrl)
+                intent.putExtra("index",position+1)
+                intent.putExtra("size",photosList.size)
                 context.startActivity(intent)
             }
         }

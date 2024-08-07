@@ -331,6 +331,8 @@ class AddAlertDialog(private val activity: Activity) {
                     imageView?.setOnClickListener {
                         val intent = Intent(activity, WatchPicActivity::class.java)
                         intent.putExtra("photoUrl", albumUri.uri.toString())
+                        intent.putExtra("index",index+1)
+                        intent.putExtra("size",albumUriList.size)
                         activity.startActivity(intent)
                     }
                 }

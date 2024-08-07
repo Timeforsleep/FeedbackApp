@@ -584,6 +584,8 @@ class MainActivity : AppCompatActivity() {
                     imageView.setOnClickListener {
                         val intent = Intent(this@MainActivity, WatchPicActivity::class.java)
                         intent.putExtra("photoUrl", albumUri.uri.toString())
+                        intent.putExtra("index",index+1)
+                        intent.putExtra("size",albumUriList.size)
                         startActivity(intent)
                     }
                 }
